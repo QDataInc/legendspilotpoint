@@ -14,6 +14,7 @@ import TestSupabase from "./components/TestSupabase";
 import TestCheckout from "./components/TestCheckout";
 import Login from "./components/Login";
 import { AuthProvider } from "./context/AuthContext";
+import Confirmation from "./components/Confirmation";
 
 function App() {
   return (
@@ -38,6 +39,7 @@ function App() {
               <Route path="/test-supabase" element={<TestSupabase />}></Route>
               <Route path="/test-checkout" element={<TestCheckout />}></Route>
               <Route path="/login" element={<Login />}></Route>
+              <Route path="/confirmation" element={<Confirmation />}></Route>
             </Routes>
           </main>
           <Footer></Footer>

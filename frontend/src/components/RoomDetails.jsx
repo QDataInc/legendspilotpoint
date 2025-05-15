@@ -147,8 +147,10 @@ const RoomDetails = () => {
       }
 
       const roomType = room.type.toLowerCase().includes('king') ? 'king' : 'queen';
+      // Only assign roomId for now (simulate assignment, or you can do this after payment)
       const assignedRoomId = await markRoomAsBooked(roomType, bookingInfo.checkInDate, bookingInfo.checkOutDate);
 
+      // Store booking info in localStorage for confirmation page
       const bookingData = {
         guest_name: bookingInfo.fullName,
         email: bookingInfo.email,
@@ -159,16 +161,9 @@ const RoomDetails = () => {
         children: bookingInfo.children,
         special_requests: bookingInfo.specialRequests || '',
         room_type: roomType,
-        room_id: assignedRoomId,
-        status: 'confirmed',
-        booking_status: 'confirmed'
+        room_id: assignedRoomId
       };
-
-      const { error: bookingError } = await supabase.from('bookings').insert(bookingData);
-      if (bookingError) return setError(`Failed to save booking: ${bookingError.message}`);
-
-      await supabase.from('rooms').update({ status: 'booked' }).eq('id', assignedRoomId);
-      await refreshAvailability(checkInDate, checkOutDate);
+      localStorage.setItem('pendingBooking', JSON.stringify(bookingData));
 
       // 👉 Trigger Square payment
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/create-payment`, {
