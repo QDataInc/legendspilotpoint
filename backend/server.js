@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import crypto from 'crypto';
 import { Client, Environment } from 'square';
 import nodemailer from 'nodemailer';
+import { supabase } from './supabase';
 
 dotenv.config();
 
@@ -85,6 +86,36 @@ app.post('/api/create-payment', async (req, res) => {
   } catch (error) {
     console.error('❌ Email or Payment Error:', error);
     res.status(500).json({ error: 'Failed to send email or generate payment link' });
+  }
+});
+
+app.post('/api/confirm-booking', async (req, res) => {
+  const bookingData = req.body;
+  try {
+    // Save booking to database (Supabase)
+    const { guest_name, email, phone, check_in_date, check_out_date, adults, children, special_requests, room_type, room_id } = bookingData;
+    // Insert booking
+    const { data, error: bookingError } = await supabase.from('bookings').insert({
+      guest_name,
+      email,
+      phone,
+      check_in_date,
+      check_out_date,
+      adults,
+      children,
+      special_requests,
+      room_type,
+      room_id,
+      status: 'confirmed',
+      booking_status: 'confirmed'
+    });
+    if (bookingError) throw bookingError;
+    // Update room status
+    await supabase.from('rooms').update({ status: 'booked' }).eq('id', room_id);
+    res.json({ success: true });
+  } catch (err) {
+    console.error('❌ Booking Error:', err);
+    res.status(500).json({ error: 'Failed to save booking after payment' });
   }
 });
 
