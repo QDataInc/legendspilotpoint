@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 import crypto from 'crypto';
 import { Client, Environment } from 'square';
 import nodemailer from 'nodemailer';
-import { supabase } from './supabase';
+import { supabase } from './supabase.js';
 
 dotenv.config();
 
