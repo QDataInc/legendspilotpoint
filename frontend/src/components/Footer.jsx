@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { FaFacebook, FaInstagram, FaTwitter, FaLinkedin, FaMapMarkerAlt, FaPhone, FaEnvelope } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
 
 const Footer = () => {
   return (
@@ -44,10 +45,10 @@ const Footer = () => {
                   whileHover={{ x: 5 }}
                   className="text-gray-400 hover:text-[#F56A00] transition-colors duration-300"
                 >
-                  <a href={item.path} className="flex items-center">
+                  <Link to={item.path} className="flex items-center">
                     <span className="w-2 h-2 bg-[#F56A00] rounded-full mr-2"></span>
                     {item.label}
-                  </a>
+                  </Link>
                 </motion.li>
               ))}
             </ul>
