@@ -409,13 +409,11 @@ const RoomDetails = () => {
 
               <div className="mb-6">
                 <h2 className="text-xl font-['Cinzel'] font-semibold text-[#8B2500] mb-4">Amenities</h2>
-                <ul className="grid grid-cols-2 gap-3">
-                  {room.amenities.map((amenity, index) => (
-                    <li key={index} className="text-gray-700 flex items-center">
-                      <span className="w-2 h-2 bg-[#F56A00] rounded-full mr-3"></span>
-                      {amenity}
-                    </li>
-                  ))}
+                <ul className="space-y-2 text-lg">
+                  <li>🚗 Secured on-site parking 📶 Complimentary high-speed Wi-Fi</li>
+                  <li>🐾 Pet-friendly ($20/day, service animals stay free) 🛒 Convenience store available</li>
+                  <li>🧼 Housekeeping upon request ♿ Wheelchair-accessible areas*</li>
+                  <li>🚭 All rooms non-smoking 🏊‍♂️ Outdoor swimming pool</li>
                 </ul>
               </div>
             </div>

@@ -374,21 +374,13 @@ const Reservation = () => {
                           ${getRoomPrice(room.type, searchParams.checkIn || new Date())}/night
                         </p>
                       </div>
-                      <div className="flex items-center mt-1 text-green-700 font-medium text-base">
-                        <svg className="mr-1" width="20" height="20" viewBox="0 0 20 20" fill="none">
-                          <path d="M7.629 14.29a1 1 0 0 1-1.415 0l-3.5-3.5a1 1 0 1 1 1.415-1.415l2.793 2.793 6.793-6.793a1 1 0 1 1 1.415 1.415l-7.5 7.5z" fill="#388e3c"/>
-                        </svg>
-                        Total includes taxes and fees
-                      </div>
                       <div className="mt-4">
                         <h4 className="text-[#2E2E2E] font-semibold mb-2">Amenities:</h4>
-                        <ul className="grid grid-cols-2 gap-2">
-                          {room.amenities.map((amenity, index) => (
-                            <li key={index} className="text-gray-600 flex items-center">
-                              <span className="w-2 h-2 bg-[#F56A00] rounded-full mr-2"></span>
-                              {amenity}
-                            </li>
-                          ))}
+                        <ul className="space-y-2 text-base">
+                          <li>🚗 Secured on-site parking 📶 Complimentary high-speed Wi-Fi</li>
+                          <li>🐾 Pet-friendly ($20/day, service animals stay free) 🛒 Convenience store available</li>
+                          <li>🧼 Housekeeping upon request ♿ Wheelchair-accessible areas*</li>
+                          <li>🚭 All rooms non-smoking 🏊‍♂️ Outdoor swimming pool</li>
                         </ul>
                       </div>
                       {room.availableCount > 0 ? (
