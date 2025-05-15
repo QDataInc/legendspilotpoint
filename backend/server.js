@@ -15,7 +15,7 @@ app.use(cors({
   origin: [
     'https://www.legendspilotpoint.com',
     'https://legendspilotpoint.vercel.app',
-    'https://legendspilotpoint-git-main-qdatas-projects.vercel.app'
+    /^https:\/\/legendspilotpoint-.*\.vercel\.app$/
   ]
 }));
 app.use(express.json());
