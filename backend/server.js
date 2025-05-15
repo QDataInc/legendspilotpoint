@@ -37,33 +37,6 @@ app.post('/api/create-payment', async (req, res) => {
   const { amount, email, guestName, roomType, checkInDate, checkOutDate } = req.body;
 
   try {
-    console.log('📧 Sending email to admin...');
-    await transporter.sendMail({
-      from: `Four Horsemen Motel <${process.env.EMAIL_USER}>`,
-      to: process.env.ADMIN_EMAIL,
-      subject: 'New Room Booking',
-      html: `
-        <p><strong>${guestName}</strong> has booked a room.</p>
-        <p><strong>Room:</strong> ${roomType}</p>
-        <p><strong>Check-in:</strong> ${checkInDate}</p>
-        <p><strong>Check-out:</strong> ${checkOutDate}</p>
-      `
-    });
-    console.log(`✅ Admin email sent to ${process.env.ADMIN_EMAIL}`);
-
-    console.log(`📧 Sending confirmation to guest (${email})`);
-    await transporter.sendMail({
-      from: `Four Horsemen Motel <${process.env.EMAIL_USER}>`,
-      to: email,
-      subject: 'Your Booking is Confirmed!',
-      html: `
-        <p>Thank you for booking with us, <strong>${guestName}</strong>!</p>
-        <p>Your <strong>${roomType}</strong> room from <strong>${checkInDate}</strong> to <strong>${checkOutDate}</strong> has been confirmed.</p>
-        <p>We look forward to hosting you!</p>
-      `
-    });
-    console.log(`✅ Guest email sent to ${email}`);
-
     const response = await client.checkoutApi.createPaymentLink({
       idempotencyKey: crypto.randomUUID(),
       quickPay: {
@@ -85,8 +58,8 @@ app.post('/api/create-payment', async (req, res) => {
     res.json({ url: response.result.paymentLink.url });
 
   } catch (error) {
-    console.error('❌ Email or Payment Error:', error);
-    res.status(500).json({ error: 'Failed to send email or generate payment link' });
+    console.error('❌ Payment Link Error:', error);
+    res.status(500).json({ error: 'Failed to generate payment link' });
   }
 });
 
@@ -113,6 +86,35 @@ app.post('/api/confirm-booking', async (req, res) => {
     if (bookingError) throw bookingError;
     // Update room status
     await supabase.from('rooms').update({ status: 'booked' }).eq('id', room_id);
+
+    // Send emails after successful booking
+    console.log('📧 Sending email to admin...');
+    await transporter.sendMail({
+      from: `Four Horsemen Motel <${process.env.EMAIL_USER}>`,
+      to: process.env.ADMIN_EMAIL,
+      subject: 'New Room Booking',
+      html: `
+        <p><strong>${guest_name}</strong> has booked a room.</p>
+        <p><strong>Room:</strong> ${room_type}</p>
+        <p><strong>Check-in:</strong> ${check_in_date}</p>
+        <p><strong>Check-out:</strong> ${check_out_date}</p>
+      `
+    });
+    console.log(`✅ Admin email sent to ${process.env.ADMIN_EMAIL}`);
+
+    console.log(`📧 Sending confirmation to guest (${email})`);
+    await transporter.sendMail({
+      from: `Four Horsemen Motel <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: 'Your Booking is Confirmed!',
+      html: `
+        <p>Thank you for booking with us, <strong>${guest_name}</strong>!</p>
+        <p>Your <strong>${room_type}</strong> room from <strong>${check_in_date}</strong> to <strong>${check_out_date}</strong> has been confirmed.</p>
+        <p>We look forward to hosting you!</p>
+      `
+    });
+    console.log(`✅ Guest email sent to ${email}`);
+
     res.json({ success: true });
   } catch (err) {
     console.error('❌ Booking Error:', err);
