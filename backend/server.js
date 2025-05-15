@@ -14,7 +14,8 @@ const PORT = process.env.PORT || 3001;
 app.use(cors({
   origin: [
     'https://www.legendspilotpoint.com',
-    'https://legendspilotpoint.vercel.app'
+    'https://legendspilotpoint.vercel.app',
+    'https://legendspilotpoint-git-main-qdatas-projects.vercel.app'
   ]
 }));
 app.use(express.json());
