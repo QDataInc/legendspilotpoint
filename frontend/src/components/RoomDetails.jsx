@@ -277,7 +277,23 @@ const RoomDetails = () => {
     setRoom(foundRoom);
   }, [roomId]);
 
-  if (!room) return <div className="pt-20">Loading...</div>;
+  if (!room) return (
+    <div className="pt-20 text-center">
+      <div className="text-red-700 text-2xl font-bold mb-4">Room not found or unavailable.</div>
+      <button
+        className="mt-4 px-6 py-2 bg-[#F56A00] text-white rounded-lg"
+        onClick={() => navigate('/')}
+      >
+        Go to Home
+      </button>
+      <button
+        className="mt-4 ml-4 px-6 py-2 bg-gray-600 text-white rounded-lg"
+        onClick={() => navigate('/reservation')}
+      >
+        Back to Reservation
+      </button>
+    </div>
+  );
 
   const carouselSettings = {
     dots: true, infinite: true, speed: 500,
