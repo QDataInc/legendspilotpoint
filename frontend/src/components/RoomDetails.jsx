@@ -171,7 +171,7 @@ const RoomDetails = () => {
       await refreshAvailability(checkInDate, checkOutDate);
 
       // 👉 Trigger Square payment
-      const response = await fetch('http://localhost:3001/api/create-payment', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/create-payment`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
