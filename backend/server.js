@@ -10,7 +10,12 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-app.use(cors());
+app.use(cors({
+  origin: [
+    'https://www.legendspilotpoint.com',
+    'https://legendspilotpoint.vercel.app'
+  ]
+}));
 app.use(express.json());
 
 const client = new Client({
