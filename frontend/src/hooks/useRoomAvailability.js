@@ -47,9 +47,7 @@ export const useRoomAvailability = () => {
           .from('bookings')
           .select('room_id, room_type')
           .neq('status', 'cancelled')
-          .or(
-            `and(check_in_date.lte.${checkOutDate},check_out_date.gte.${checkInDate})`
-          );
+          .or(`and(check_in_date.lt.${checkOutDate},check_out_date.gt.${checkInDate})`);
 
         if (bookingsError) throw bookingsError;
 
@@ -87,14 +85,13 @@ export const useRoomAvailability = () => {
     try {
       console.log('Finding available room for:', { roomType, checkInDate, checkOutDate });
 
-      // Get all room IDs that are already booked for these dates
+      // Get all room IDs that are already booked for these dates (using correct overlap logic)
       const { data: bookedRooms, error: bookingsError } = await supabase
         .from('bookings')
         .select('room_id')
         .eq('room_type', roomType)
         .neq('status', 'cancelled')
-        .gte('check_in_date', checkInDate)
-        .lte('check_out_date', checkOutDate);
+        .or(`and(check_in_date.lt.${checkOutDate},check_out_date.gt.${checkInDate})`);
 
       if (bookingsError) throw bookingsError;
 
