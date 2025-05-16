@@ -147,8 +147,13 @@ const RoomDetails = () => {
       }
 
       const roomType = room.type.toLowerCase().includes('king') ? 'king' : 'queen';
-      // Only assign roomId for now (simulate assignment, or you can do this after payment)
+      // Always assign any available room of the selected type
       const assignedRoomId = await markRoomAsBooked(roomType, bookingInfo.checkInDate, bookingInfo.checkOutDate);
+
+      // If the assigned room is not the one in the URL, show a message
+      if (assignedRoomId !== room.id) {
+        alert(`The specific room you selected is not available for these dates. You have been assigned another available ${room.type} (Room ID: ${assignedRoomId}).`);
+      }
 
       // Store booking info in localStorage for confirmation page
       const bookingData = {
