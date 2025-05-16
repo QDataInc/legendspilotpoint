@@ -58,13 +58,25 @@ const Confirmation = () => {
   );
   return (
     <div className="pt-20 text-center text-red-700 text-xl">
-      {error}
+      {error || 'No booking in progress. If you clicked back from payment, you can return to your previous page or start a new reservation.'}
       <div>
         <button
           className="mt-6 px-6 py-2 bg-[#F56A00] text-white rounded-lg"
+          onClick={() => navigate(-1)}
+        >
+          Go Back
+        </button>
+        <button
+          className="mt-6 ml-4 px-6 py-2 bg-gray-600 text-white rounded-lg"
           onClick={() => navigate('/')}
         >
           Go to Home
+        </button>
+        <button
+          className="mt-6 ml-4 px-6 py-2 bg-blue-600 text-white rounded-lg"
+          onClick={() => navigate('/reservation')}
+        >
+          Make a Reservation
         </button>
       </div>
     </div>
