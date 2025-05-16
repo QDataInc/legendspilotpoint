@@ -67,9 +67,35 @@ app.post('/api/confirm-booking', async (req, res) => {
   const bookingData = req.body;
   try {
     console.log('Booking data received:', bookingData);
-    const { guest_name, email, phone, check_in_date, check_out_date, adults, children, special_requests, room_type, room_id } = bookingData;
-    console.log('Room ID to update:', room_id);
-    // Insert booking
+    const { guest_name, email, phone, check_in_date, check_out_date, adults, children, special_requests, room_type } = bookingData;
+
+    // 1. Find all available rooms of the requested type
+    const { data: rooms, error: roomsError } = await supabase
+      .from('rooms')
+      .select('id')
+      .eq('room_type', room_type)
+      .eq('status', 'available');
+    if (roomsError) throw roomsError;
+    if (!rooms || rooms.length === 0) throw new Error('No rooms of this type available');
+
+    // 2. For each room, check for overlapping bookings
+    let assignedRoomId = null;
+    for (const room of rooms) {
+      const { data: overlappingBookings, error: overlapError } = await supabase
+        .from('bookings')
+        .select('id')
+        .eq('room_id', room.id)
+        .neq('status', 'cancelled')
+        .or(`and(check_in_date.lt.${check_out_date},check_out_date.gt.${check_in_date})`);
+      if (overlapError) throw overlapError;
+      if (!overlappingBookings || overlappingBookings.length === 0) {
+        assignedRoomId = room.id;
+        break;
+      }
+    }
+    if (!assignedRoomId) throw new Error('No rooms available for the selected dates');
+
+    // 3. Insert booking
     const { data, error: bookingError } = await supabase.from('bookings').insert({
       guest_name,
       email,
@@ -80,16 +106,16 @@ app.post('/api/confirm-booking', async (req, res) => {
       children,
       special_requests,
       room_type,
-      room_id,
+      room_id: assignedRoomId,
       status: 'confirmed',
       booking_status: 'confirmed'
     });
     if (bookingError) throw bookingError;
-    // Update room status with error handling
+    // 4. Update room status
     const { error: roomUpdateError, data: roomUpdateData } = await supabase
       .from('rooms')
       .update({ status: 'booked' })
-      .eq('id', room_id);
+      .eq('id', assignedRoomId);
     if (roomUpdateError) {
       console.error('❌ Room status update error:', roomUpdateError);
       throw roomUpdateError;
@@ -124,10 +150,10 @@ app.post('/api/confirm-booking', async (req, res) => {
     });
     console.log(`✅ Guest email sent to ${email}`);
 
-    res.json({ success: true });
+    res.json({ success: true, assignedRoomId });
   } catch (err) {
     console.error('❌ Booking Error:', err);
-    res.status(500).json({ error: 'Failed to save booking after payment' });
+    res.status(500).json({ error: err.message || 'Failed to save booking after payment' });
   }
 });
 
