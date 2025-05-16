@@ -147,15 +147,7 @@ const RoomDetails = () => {
       }
 
       const roomType = room.type.toLowerCase().includes('king') ? 'king' : 'queen';
-      // Always assign any available room of the selected type
-      const assignedRoomId = await markRoomAsBooked(roomType, bookingInfo.checkInDate, bookingInfo.checkOutDate);
-
-      // If the assigned room is not the one in the URL, show a message
-      if (assignedRoomId !== room.id) {
-        alert(`The specific room you selected is not available for these dates. You have been assigned another available ${room.type} (Room ID: ${assignedRoomId}).`);
-      }
-
-      // Store booking info in localStorage for confirmation page
+      // Prepare booking data WITHOUT assigning room_id
       const bookingData = {
         guest_name: bookingInfo.fullName,
         email: bookingInfo.email,
@@ -165,8 +157,7 @@ const RoomDetails = () => {
         adults: bookingInfo.adults,
         children: bookingInfo.children,
         special_requests: bookingInfo.specialRequests || '',
-        room_type: roomType,
-        room_id: assignedRoomId
+        room_type: roomType
       };
       localStorage.setItem('pendingBooking', JSON.stringify(bookingData));
 
