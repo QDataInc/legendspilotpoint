@@ -99,13 +99,17 @@ export const useRoomAvailability = () => {
       console.log('Booked room IDs:', bookedRoomIds);
 
       // Find an available room
-      const { data: availableRooms, error: roomError } = await supabase
+      let availableRoomsQuery = supabase
         .from('rooms')
         .select('id')
         .eq('room_type', roomType)
-        .eq('status', 'available')
-        .not('id', 'in', `(${bookedRoomIds.join(',')})`)
-        .limit(1);
+        .eq('status', 'available');
+
+      if (bookedRoomIds.length > 0) {
+        availableRoomsQuery = availableRoomsQuery.not('id', 'in', `(${bookedRoomIds.join(',')})`);
+      }
+
+      const { data: availableRooms, error: roomError } = await availableRoomsQuery.limit(1);
 
       if (roomError) throw roomError;
       console.log('Available rooms found:', availableRooms);
