@@ -66,8 +66,9 @@ app.post('/api/create-payment', async (req, res) => {
 app.post('/api/confirm-booking', async (req, res) => {
   const bookingData = req.body;
   try {
-    // Save booking to database (Supabase)
+    console.log('Booking data received:', bookingData);
     const { guest_name, email, phone, check_in_date, check_out_date, adults, children, special_requests, room_type, room_id } = bookingData;
+    console.log('Room ID to update:', room_id);
     // Insert booking
     const { data, error: bookingError } = await supabase.from('bookings').insert({
       guest_name,
@@ -84,8 +85,16 @@ app.post('/api/confirm-booking', async (req, res) => {
       booking_status: 'confirmed'
     });
     if (bookingError) throw bookingError;
-    // Update room status
-    await supabase.from('rooms').update({ status: 'booked' }).eq('id', room_id);
+    // Update room status with error handling
+    const { error: roomUpdateError, data: roomUpdateData } = await supabase
+      .from('rooms')
+      .update({ status: 'booked' })
+      .eq('id', room_id);
+    if (roomUpdateError) {
+      console.error('❌ Room status update error:', roomUpdateError);
+      throw roomUpdateError;
+    }
+    console.log('✅ Room status updated:', roomUpdateData);
 
     // Send emails after successful booking
     console.log('📧 Sending email to admin...');
