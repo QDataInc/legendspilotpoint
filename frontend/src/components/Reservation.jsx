@@ -17,50 +17,7 @@ const Reservation = () => {
     children: 0
   });
 
-  const { availability, loading: availabilityLoading, refreshAvailability } = useRoomAvailability();
-
-  const availableRooms = [
-    {
-      id: 'king1',
-      type: 'Single King Bed',
-      maxOccupancy: '2 Adults, 1 Child',
-      price: 150,
-      amenities: ['Free Wi-Fi', 'City View', 'Mini Bar'],
-      image: '/img-vid/king-bedroom.jpg'
-    },
-    {
-      id: 'king2',
-      type: 'Single King Bed',
-      maxOccupancy: '2 Adults, 1 Child',
-      price: 150,
-      amenities: ['Free Wi-Fi', 'Pool View', 'Mini Bar'],
-      image: '/img-vid/king-bedroom.jpg'
-    },
-    {
-      id: 'queen1',
-      type: 'Double Queen Bed',
-      maxOccupancy: '4 Adults, 2 Children',
-      price: 200,
-      amenities: ['Free Wi-Fi', 'City View', 'Mini Bar', 'Extra Space'],
-      image: '/img-vid/queen-bedroom.jpg'
-    },
-    {
-      id: 'queen2',
-      type: 'Double Queen Bed',
-      maxOccupancy: '4 Adults, 2 Children',
-      price: 200,
-      amenities: ['Free Wi-Fi', 'Pool View', 'Mini Bar', 'Extra Space'],
-      image: '/img-vid/queen-bedroom.jpg'
-    },
-    {
-      id: 'queen3',
-      type: 'Double Queen Bed',
-      maxOccupancy: '4 Adults, 2 Children',
-      price: 200,
-      amenities: ['Free Wi-Fi', 'Garden View', 'Mini Bar', 'Extra Space'],
-      image: '/img-vid/queen-bedroom.jpg'
-    }
-  ];
+  const { fetchAvailableRooms, availableRooms, loading, error: availError } = useRoomAvailability();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -110,7 +67,8 @@ const Reservation = () => {
   const handleSearch = async () => {
     if (validateDates()) {
       try {
-        await refreshAvailability(searchParams.checkIn, searchParams.checkOut);
+        await fetchAvailableRooms('king', searchParams.checkIn, searchParams.checkOut);
+        await fetchAvailableRooms('queen', searchParams.checkIn, searchParams.checkOut);
         setShowRooms(true);
         setShowGuestModal(false);
       } catch (err) {
@@ -136,32 +94,13 @@ const Reservation = () => {
   // Get today's date in YYYY-MM-DD format for min date attribute
   const today = new Date().toISOString().split('T')[0];
 
-  // Group rooms by type and use real availability data
-  const groupedRooms = useMemo(() => {
-    const kingRoom = {
-      id: 'king1',
-      type: 'Single King Bed',
-      maxOccupancy: '2 Adults, 1 Child',
-      price: 150,
-      amenities: ['Free Wi-Fi', 'City View', 'Mini Bar'],
-      image: '/img-vid/king-bedroom.jpg',
-      availableCount: availability?.king?.available || 0,
-      totalCount: availability?.king?.total || 0
-    };
-
-    const queenRoom = {
-      id: 'queen1',
-      type: 'Double Queen Bed',
-      maxOccupancy: '4 Adults, 2 Children',
-      price: 200,
-      amenities: ['Free Wi-Fi', 'City View', 'Mini Bar', 'Extra Space'],
-      image: '/img-vid/queen-bedroom.jpg',
-      availableCount: availability?.queen?.available || 0,
-      totalCount: availability?.queen?.total || 0
-    };
-
-    return [kingRoom, queenRoom].filter(room => room.totalCount > 0);
-  }, [availability]);
+  // Group available rooms by type for display
+  const groupedRooms = availableRooms.reduce((acc, room) => {
+    const type = room.room_type.toLowerCase();
+    if (!acc[type]) acc[type] = [];
+    acc[type].push(room);
+    return acc;
+  }, {});
 
   // Price calculation helpers
   function isWeekend(dateString) {
@@ -341,69 +280,74 @@ const Reservation = () => {
             <h2 className="text-3xl font-['Cinzel'] text-[#2E2E2E] mb-8 font-bold text-center">
               Available Rooms
             </h2>
-            {availabilityLoading ? (
+            {loading ? (
               <div className="text-center text-gray-600">Loading room availability...</div>
-            ) : groupedRooms.length === 0 ? (
+            ) : Object.keys(groupedRooms).length === 0 ? (
               <div className="text-center text-gray-600">No rooms available for the selected dates.</div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {groupedRooms.map((room) => (
-                  <div
-                    key={room.id}
-                    className="bg-white rounded-xl shadow-lg overflow-hidden border border-[#D8CFC4]"
-                  >
-                    <img
-                      src={room.image}
-                      alt={room.type}
-                      className="w-full h-64 object-cover"
-                    />
-                    <div className="p-6">
-                      <div className="flex justify-between items-start mb-4">
-                        <div>
-                          <h3 className="text-2xl font-['Cinzel'] text-[#2E2E2E] font-bold">{room.type}</h3>
-                          <p className="text-gray-600 mt-2">Max Occupancy: {room.maxOccupancy}</p>
-                          <div className={`mt-2 ${room.availableCount === 0 ? 'text-red-600' : 'text-green-600'} font-semibold`}>
-                            {room.availableCount === 0 ? (
-                              'No rooms available'
-                            ) : (
-                              `${room.availableCount} ${room.availableCount === 1 ? 'room' : 'rooms'} available`
-                            )}
+                {Object.entries(groupedRooms).map(([type, rooms]) => (
+                  <div key={type}>
+                    <h3 className="text-2xl font-['Cinzel'] text-[#2E2E2E] font-bold mb-4">{type.charAt(0).toUpperCase() + type.slice(1)} Rooms</h3>
+                    {rooms.map((room) => (
+                      <div
+                        key={room.id}
+                        className="bg-white rounded-xl shadow-lg overflow-hidden border border-[#D8CFC4] mb-4"
+                      >
+                        <img
+                          src={room.image}
+                          alt={room.room_type}
+                          className="w-full h-64 object-cover"
+                        />
+                        <div className="p-6">
+                          <div className="flex justify-between items-start mb-4">
+                            <div>
+                              <h4 className="text-2xl font-['Cinzel'] text-[#2E2E2E] font-bold">{room.room_type}</h4>
+                              <p className="text-gray-600 mt-2">Max Occupancy: {room.max_occupancy}</p>
+                              <div className={`mt-2 ${room.available_count === 0 ? 'text-red-600' : 'text-green-600'} font-semibold`}>
+                                {room.available_count === 0 ? (
+                                  'No rooms available'
+                                ) : (
+                                  `${room.available_count} ${room.available_count === 1 ? 'room' : 'rooms'} available`
+                                )}
+                              </div>
+                            </div>
+                            <p className="text-2xl font-bold text-[#F56A00]">
+                              ${getRoomPrice(room.room_type, searchParams.checkIn || new Date())}/night
+                            </p>
                           </div>
+                          <div className="mt-4">
+                            <h5 className="text-[#2E2E2E] font-semibold mb-2">Amenities:</h5>
+                            <ul className="space-y-2 text-base">
+                              <li>🚗 Secured on-site parking 📶 Complimentary high-speed Wi-Fi</li>
+                              <li>🐾 Pet-friendly ($20/day, service animals stay free) 🛒 Convenience store available</li>
+                              <li>🧼 Housekeeping upon request ♿ Wheelchair-accessible areas*</li>
+                              <li>🚭 All rooms non-smoking 🏊‍♂️ Outdoor swimming pool</li>
+                            </ul>
+                          </div>
+                          {room.available_count > 0 ? (
+                            <Link
+                              to={`/room-details/${room.id}?${new URLSearchParams({
+                                checkIn: searchParams.checkIn,
+                                checkOut: searchParams.checkOut,
+                                adults: searchParams.adults,
+                                children: searchParams.children
+                              }).toString()}`}
+                              className="mt-6 block w-full bg-[#F56A00] text-white text-center px-6 py-3 rounded-lg hover:bg-[#E05F00] transition duration-300"
+                            >
+                              Book Now
+                            </Link>
+                          ) : (
+                            <button
+                              disabled
+                              className="mt-6 block w-full bg-gray-400 text-white text-center px-6 py-3 rounded-lg cursor-not-allowed"
+                            >
+                              Fully Booked
+                            </button>
+                          )}
                         </div>
-                        <p className="text-2xl font-bold text-[#F56A00]">
-                          ${getRoomPrice(room.type, searchParams.checkIn || new Date())}/night
-                        </p>
                       </div>
-                      <div className="mt-4">
-                        <h4 className="text-[#2E2E2E] font-semibold mb-2">Amenities:</h4>
-                        <ul className="space-y-2 text-base">
-                          <li>🚗 Secured on-site parking 📶 Complimentary high-speed Wi-Fi</li>
-                          <li>🐾 Pet-friendly ($20/day, service animals stay free) 🛒 Convenience store available</li>
-                          <li>🧼 Housekeeping upon request ♿ Wheelchair-accessible areas*</li>
-                          <li>🚭 All rooms non-smoking 🏊‍♂️ Outdoor swimming pool</li>
-                        </ul>
-                      </div>
-                      {room.availableCount > 0 ? (
-                        <Link
-                          to={`/room-details/${room.id}?${new URLSearchParams({
-                            checkIn: searchParams.checkIn,
-                            checkOut: searchParams.checkOut,
-                            adults: searchParams.adults,
-                            children: searchParams.children
-                          }).toString()}`}
-                          className="mt-6 block w-full bg-[#F56A00] text-white text-center px-6 py-3 rounded-lg hover:bg-[#E05F00] transition duration-300"
-                        >
-                          Book Now
-                        </Link>
-                      ) : (
-                        <button
-                          disabled
-                          className="mt-6 block w-full bg-gray-400 text-white text-center px-6 py-3 rounded-lg cursor-not-allowed"
-                        >
-                          Fully Booked
-                        </button>
-                      )}
-                    </div>
+                    ))}
                   </div>
                 ))}
               </div>
