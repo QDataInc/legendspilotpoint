@@ -94,7 +94,7 @@ app.post('/api/confirm-booking', async (req, res) => {
       console.log('Checking room', room.id, 'for overlapping bookings');
       const { data: overlappingBookings, error: overlapError } = await supabase
         .from('bookings')
-        .select('id')
+        .select('*')
         .eq('room_id', room.id)
         .neq('status', 'cancelled')
         .or(`and(check_in_date.lt.${check_out_date},check_out_date.gt.${check_in_date})`);
@@ -104,7 +104,7 @@ app.post('/api/confirm-booking', async (req, res) => {
         throw overlapError;
       }
       
-      console.log('Overlapping bookings found:', overlappingBookings);
+      console.log(`Overlap query for room ${room.id} with requested [${check_in_date} to ${check_out_date}]:`, overlappingBookings);
       
       if (!overlappingBookings || overlappingBookings.length === 0) {
         assignedRoomId = room.id;
