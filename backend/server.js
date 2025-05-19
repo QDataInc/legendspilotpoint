@@ -72,31 +72,55 @@ app.post('/api/confirm-booking', async (req, res) => {
     // 1. Find all available rooms of the requested type
     const { data: rooms, error: roomsError } = await supabase
       .from('rooms')
-      .select('id')
+      .select('id, status')
       .eq('room_type', room_type)
       .eq('status', 'available');
-    if (roomsError) throw roomsError;
-    if (!rooms || rooms.length === 0) throw new Error('No rooms of this type available');
+    
+    if (roomsError) {
+      console.error('Error fetching available rooms:', roomsError);
+      throw roomsError;
+    }
+    
+    console.log('Available rooms found:', rooms);
+    
+    if (!rooms || rooms.length === 0) {
+      console.error('No rooms of type', room_type, 'available');
+      throw new Error('No rooms of this type available');
+    }
 
     // 2. For each room, check for overlapping bookings
     let assignedRoomId = null;
     for (const room of rooms) {
+      console.log('Checking room', room.id, 'for overlapping bookings');
       const { data: overlappingBookings, error: overlapError } = await supabase
         .from('bookings')
         .select('id')
         .eq('room_id', room.id)
         .neq('status', 'cancelled')
         .or(`and(check_in_date.lt.${check_out_date},check_out_date.gt.${check_in_date})`);
-      if (overlapError) throw overlapError;
+      
+      if (overlapError) {
+        console.error('Error checking overlapping bookings:', overlapError);
+        throw overlapError;
+      }
+      
+      console.log('Overlapping bookings found:', overlappingBookings);
+      
       if (!overlappingBookings || overlappingBookings.length === 0) {
         assignedRoomId = room.id;
+        console.log('Room', room.id, 'is available for booking');
         break;
       }
     }
-    if (!assignedRoomId) throw new Error('No rooms available for the selected dates');
+    
+    if (!assignedRoomId) {
+      console.error('No rooms available for the selected dates');
+      throw new Error('No rooms available for the selected dates');
+    }
 
     // 3. Insert booking
-    const { data, error: bookingError } = await supabase.from('bookings').insert({
+    console.log('Creating booking for room', assignedRoomId);
+    const { data: booking, error: bookingError } = await supabase.from('bookings').insert({
       guest_name,
       email,
       phone,
@@ -109,18 +133,29 @@ app.post('/api/confirm-booking', async (req, res) => {
       room_id: assignedRoomId,
       status: 'confirmed',
       booking_status: 'confirmed'
-    });
-    if (bookingError) throw bookingError;
+    }).select();
+    
+    if (bookingError) {
+      console.error('Error creating booking:', bookingError);
+      throw bookingError;
+    }
+    
+    console.log('Booking created successfully:', booking);
+
     // 4. Update room status
+    console.log('Updating room status for room', assignedRoomId);
     const { error: roomUpdateError, data: roomUpdateData } = await supabase
       .from('rooms')
       .update({ status: 'booked' })
-      .eq('id', assignedRoomId);
+      .eq('id', assignedRoomId)
+      .select();
+      
     if (roomUpdateError) {
-      console.error('❌ Room status update error:', roomUpdateError);
+      console.error('Error updating room status:', roomUpdateError);
       throw roomUpdateError;
     }
-    console.log('✅ Room status updated:', roomUpdateData);
+    
+    console.log('Room status updated successfully:', roomUpdateData);
 
     // Send emails after successful booking
     console.log('📧 Sending email to admin...');
@@ -150,9 +185,9 @@ app.post('/api/confirm-booking', async (req, res) => {
     });
     console.log(`✅ Guest email sent to ${email}`);
 
-    res.json({ success: true, assignedRoomId });
+    res.json({ success: true, assignedRoomId, booking });
   } catch (err) {
-    console.error('❌ Booking Error:', err);
+    console.error('Booking Error:', err);
     res.status(500).json({ error: err.message || 'Failed to save booking after payment' });
   }
 });
