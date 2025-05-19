@@ -69,6 +69,9 @@ app.post('/api/confirm-booking', async (req, res) => {
     console.log('Booking data received:', bookingData);
     const { guest_name, email, phone, check_in_date, check_out_date, adults, children, special_requests, room_type } = bookingData;
 
+    // Log the requested booking dates for debugging
+    console.log('Requested booking:', { check_in_date, check_out_date });
+
     // 1. Find all available rooms of the requested type
     const { data: rooms, error: roomsError } = await supabase
       .from('rooms')
