@@ -13,7 +13,7 @@ export const useRoomAvailability = () => {
   const fetchAvailability = async (checkInDate = null, checkOutDate = null) => {
     try {
       setLoading(true);
-      console.log('Fetching availability for dates:', { checkInDate, checkOutDate });
+      console.log('Checking availability for:', { checkInDate, checkOutDate });
       
       // Initialize counts with default values
       const counts = {
@@ -26,6 +26,8 @@ export const useRoomAvailability = () => {
         .from('rooms')
         .select('id, room_type, status');
 
+      console.log('Rooms from DB:', rooms);
+
       if (roomsError) {
         console.error('Error fetching rooms:', roomsError);
         throw roomsError;
@@ -35,10 +37,11 @@ export const useRoomAvailability = () => {
       if (rooms) {
         // If dates are provided, fetch bookings first
         let bookedRoomIds = new Set();
+        let bookings = [];
         if (checkInDate && checkOutDate) {
-          const { data: bookings, error: bookingsError } = await supabase
+          const { data: bookingsData, error: bookingsError } = await supabase
             .from('bookings')
-            .select('room_id, room_type, status')
+            .select('room_id, room_type, status, check_in_date, check_out_date')
             .neq('status', 'cancelled')
             .or(`and(check_in_date.lt.${checkOutDate},check_out_date.gt.${checkInDate})`);
 
@@ -46,7 +49,9 @@ export const useRoomAvailability = () => {
             console.error('Error fetching bookings:', bookingsError);
             throw bookingsError;
           }
+          bookings = bookingsData;
           bookedRoomIds = new Set(bookings.map(booking => booking.room_id));
+          console.log('Bookings from DB:', bookings);
         }
 
         rooms.forEach(room => {
@@ -61,7 +66,7 @@ export const useRoomAvailability = () => {
         });
       }
 
-      console.log('Initial room counts:', counts);
+      console.log('Final availability:', counts);
 
       setAvailability(counts);
       setError(null);
