@@ -31,13 +31,30 @@ export const useRoomAvailability = () => {
         throw roomsError;
       }
 
-      // Count total rooms by type and initially available rooms
+      // Count total rooms by type and available rooms (corrected logic)
       if (rooms) {
+        // If dates are provided, fetch bookings first
+        let bookedRoomIds = new Set();
+        if (checkInDate && checkOutDate) {
+          const { data: bookings, error: bookingsError } = await supabase
+            .from('bookings')
+            .select('room_id, room_type, status')
+            .neq('status', 'cancelled')
+            .or(`and(check_in_date.lt.${checkOutDate},check_out_date.gt.${checkInDate})`);
+
+          if (bookingsError) {
+            console.error('Error fetching bookings:', bookingsError);
+            throw bookingsError;
+          }
+          bookedRoomIds = new Set(bookings.map(booking => booking.room_id));
+        }
+
         rooms.forEach(room => {
           const type = room.room_type.toLowerCase();
           if (counts[type]) {
             counts[type].total++;
-            if (room.status === 'available') {
+            // Only count as available if status is 'available' AND not booked for the date range
+            if (room.status === 'available' && (!checkInDate || !checkOutDate || !bookedRoomIds.has(room.id))) {
               counts[type].available++;
             }
           }
@@ -45,35 +62,6 @@ export const useRoomAvailability = () => {
       }
 
       console.log('Initial room counts:', counts);
-
-      // If dates are provided, check for bookings in that period
-      if (checkInDate && checkOutDate) {
-        const { data: bookings, error: bookingsError } = await supabase
-          .from('bookings')
-          .select('room_id, room_type, status')
-          .neq('status', 'cancelled')
-          .or(`and(check_in_date.lt.${checkOutDate},check_out_date.gt.${checkInDate})`);
-
-        if (bookingsError) {
-          console.error('Error fetching bookings:', bookingsError);
-          throw bookingsError;
-        }
-
-        console.log('Existing bookings for date range:', bookings);
-
-        // Create a map of booked room IDs
-        const bookedRoomIds = new Set(bookings.map(booking => booking.room_id));
-        
-        // For each room, check if it's booked
-        rooms.forEach(room => {
-          const type = room.room_type.toLowerCase();
-          if (counts[type] && bookedRoomIds.has(room.id)) {
-            counts[type].available--;
-          }
-        });
-
-        console.log('Final availability after checking bookings:', counts);
-      }
 
       setAvailability(counts);
       setError(null);
