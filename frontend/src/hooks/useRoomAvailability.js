@@ -21,51 +21,56 @@ export const useRoomAvailability = () => {
         queen: { total: 0, available: 0 }
       };
 
-      // Get all rooms
+      // Get all rooms with their current status
       const { data: rooms, error: roomsError } = await supabase
         .from('rooms')
-        .select('id, room_type');
+        .select('id, room_type, status');
 
-      if (roomsError) throw roomsError;
+      if (roomsError) {
+        console.error('Error fetching rooms:', roomsError);
+        throw roomsError;
+      }
 
-      // Count total rooms by type
+      // Count total rooms by type and initially available rooms
       if (rooms) {
         rooms.forEach(room => {
           const type = room.room_type.toLowerCase();
           if (counts[type]) {
             counts[type].total++;
-            counts[type].available++; // Initially assume all rooms are available
+            if (room.status === 'available') {
+              counts[type].available++;
+            }
           }
         });
       }
 
-      console.log('Total rooms by type:', counts);
+      console.log('Initial room counts:', counts);
 
       // If dates are provided, check for bookings in that period
       if (checkInDate && checkOutDate) {
         const { data: bookings, error: bookingsError } = await supabase
           .from('bookings')
-          .select('room_id, room_type')
+          .select('room_id, room_type, status')
           .neq('status', 'cancelled')
           .or(`and(check_in_date.lt.${checkOutDate},check_out_date.gt.${checkInDate})`);
 
-        if (bookingsError) throw bookingsError;
+        if (bookingsError) {
+          console.error('Error fetching bookings:', bookingsError);
+          throw bookingsError;
+        }
 
         console.log('Existing bookings for date range:', bookings);
 
-        // Subtract only the rooms that have actual bookings
-        if (bookings && bookings.length > 0) {
-          // Create a map of booked room IDs
-          const bookedRoomIds = new Set(bookings.map(booking => booking.room_id));
-          
-          // For each room, check if it's booked
-          rooms.forEach(room => {
-            const type = room.room_type.toLowerCase();
-            if (counts[type] && bookedRoomIds.has(room.id)) {
-              counts[type].available--;
-            }
-          });
-        }
+        // Create a map of booked room IDs
+        const bookedRoomIds = new Set(bookings.map(booking => booking.room_id));
+        
+        // For each room, check if it's booked
+        rooms.forEach(room => {
+          const type = room.room_type.toLowerCase();
+          if (counts[type] && bookedRoomIds.has(room.id)) {
+            counts[type].available--;
+          }
+        });
 
         console.log('Final availability after checking bookings:', counts);
       }
@@ -169,8 +174,10 @@ export const useRoomAvailability = () => {
         }, 
         async (payload) => {
           console.log('Booking change detected:', payload);
-          // If a booking is deleted, reset the room's status
-          if (payload.eventType === 'DELETE' && payload.old?.room_id) {
+          // If a booking is deleted or cancelled, reset the room's status
+          if ((payload.eventType === 'DELETE' || 
+              (payload.eventType === 'UPDATE' && payload.new.status === 'cancelled')) && 
+              payload.old?.room_id) {
             await resetRoomStatus(payload.old.room_id);
           }
           fetchAvailability();
