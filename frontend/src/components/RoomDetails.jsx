@@ -146,33 +146,23 @@ const RoomDetails = () => {
         return;
       }
 
-      const roomType = room.type.toLowerCase().includes('king') ? 'king' : 'queen';
-      // Prepare booking data WITHOUT assigning room_id
       const bookingData = {
-        guest_name: bookingInfo.fullName,
+        amount: (checkInDate && checkOutDate) ? getTotalPrice(room.type, checkInDate, checkOutDate) : 0,
         email: bookingInfo.email,
+        guestName: bookingInfo.fullName,
         phone: bookingInfo.phone,
-        check_in_date: bookingInfo.checkInDate,
-        check_out_date: bookingInfo.checkOutDate,
+        roomType: room.type,
+        checkInDate: bookingInfo.checkInDate,
+        checkOutDate: bookingInfo.checkOutDate,
         adults: bookingInfo.adults,
         children: bookingInfo.children,
-        special_requests: bookingInfo.specialRequests || '',
-        room_type: roomType
+        special_requests: bookingInfo.specialRequests || ''
       };
-      localStorage.setItem('pendingBooking', JSON.stringify(bookingData));
 
-      // 👉 Trigger Square payment
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/create-payment`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          amount: (checkInDate && checkOutDate) ? getTotalPrice(room.type, checkInDate, checkOutDate) : 0,
-          email: bookingInfo.email,
-          guestName: bookingInfo.fullName,
-          roomType: room.type,
-          checkInDate: bookingInfo.checkInDate,
-          checkOutDate: bookingInfo.checkOutDate,
-        }),
+        body: JSON.stringify(bookingData),
       });
 
       const data = await response.json();
@@ -182,9 +172,7 @@ const RoomDetails = () => {
         setError('Failed to generate payment link.');
       }
     } catch (err) {
-      console.error('Unexpected error:', err);
       setError(err.message || 'Something went wrong. Try again.');
-      refreshAvailability(checkInDate, checkOutDate);
     } finally {
       setIsProcessing(false);
     }
