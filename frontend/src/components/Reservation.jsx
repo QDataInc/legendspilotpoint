@@ -3,6 +3,34 @@ import { Link, useNavigate } from 'react-router-dom';
 import { FaCalendarAlt, FaUsers, FaSearch } from 'react-icons/fa';
 import { useRoomAvailability } from '../hooks/useRoomAvailability';
 
+// Add a static mapping for room amenities and images
+const ROOM_DETAILS = {
+  king: {
+    amenities: [
+      'Free Wi-Fi',
+      'Air Conditioning',
+      'Flat-screen TV',
+      'Mini Fridge',
+      'Private Bathroom',
+      'Room Service',
+      'King Size Bed',
+    ],
+    image: '/images/king-room.jpg', // Update with your actual image path
+  },
+  queen: {
+    amenities: [
+      'Free Wi-Fi',
+      'Air Conditioning',
+      'Flat-screen TV',
+      'Mini Fridge',
+      'Private Bathroom',
+      'Room Service',
+      'Queen Size Bed',
+    ],
+    image: '/images/queen-room.jpg', // Update with your actual image path
+  },
+};
+
 const Reservation = () => {
   const navigate = useNavigate();
   const [showGuestModal, setShowGuestModal] = useState(false);
@@ -295,14 +323,14 @@ const Reservation = () => {
                         className="bg-white rounded-xl shadow-lg overflow-hidden border border-[#D8CFC4] mb-4"
                       >
                         <img
-                          src={room.image}
-                          alt={room.room_type}
+                          src={ROOM_DETAILS[type].image}
+                          alt={`${type} room`}
                           className="w-full h-64 object-cover"
                         />
                         <div className="p-6">
                           <div className="flex justify-between items-start mb-4">
                             <div>
-                              <h4 className="text-2xl font-['Cinzel'] text-[#2E2E2E] font-bold">{room.room_type}</h4>
+                              <h4 className="text-2xl font-['Cinzel'] text-[#2E2E2E] font-bold">{type.charAt(0).toUpperCase() + type.slice(1)}</h4>
                               <p className="text-gray-600 mt-2">Max Occupancy: {room.max_occupancy}</p>
                               <div className={`mt-2 ${room.available_count === 0 ? 'text-red-600' : 'text-green-600'} font-semibold`}>
                                 {room.available_count === 0 ? (
@@ -313,16 +341,13 @@ const Reservation = () => {
                               </div>
                             </div>
                             <p className="text-2xl font-bold text-[#F56A00]">
-                              ${getRoomPrice(room.room_type, searchParams.checkIn || new Date())}/night
+                              ${getRoomPrice(type, searchParams.checkIn || new Date())}/night
                             </p>
                           </div>
                           <div className="mt-4">
                             <h5 className="text-[#2E2E2E] font-semibold mb-2">Amenities:</h5>
                             <ul className="space-y-2 text-base">
-                              <li>🚗 Secured on-site parking 📶 Complimentary high-speed Wi-Fi</li>
-                              <li>🐾 Pet-friendly ($20/day, service animals stay free) 🛒 Convenience store available</li>
-                              <li>🧼 Housekeeping upon request ♿ Wheelchair-accessible areas*</li>
-                              <li>🚭 All rooms non-smoking 🏊‍♂️ Outdoor swimming pool</li>
+                              {ROOM_DETAILS[type].amenities.map(a => <li key={a}>{a}</li>)}
                             </ul>
                           </div>
                           {room.available_count > 0 ? (
