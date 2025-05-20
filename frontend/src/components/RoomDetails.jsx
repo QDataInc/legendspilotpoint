@@ -8,6 +8,8 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { useRoomAvailability } from '../hooks/useRoomAvailability';
 
+const API_BASE = import.meta.env.VITE_API_URL || '';
+
 const RoomDetails = () => {
   const { roomId } = useParams();
   const navigate = useNavigate();
@@ -114,25 +116,33 @@ const RoomDetails = () => {
         return;
       }
 
-      const bookingDetails = {
-        room_id: roomId,
-        room_type: room.room_type,
-        guest_name: bookingInfo.fullName,
+      const bookingData = {
+        amount: getTotalPrice(room.room_type, bookingInfo.checkInDate, bookingInfo.checkOutDate),
         email: bookingInfo.email,
-        phone: bookingInfo.phone,
-        check_in_date: bookingInfo.checkInDate,
-        check_out_date: bookingInfo.checkOutDate,
+        guestName: bookingInfo.fullName,
+        roomType: room.room_type,
+        checkInDate: bookingInfo.checkInDate,
+        checkOutDate: bookingInfo.checkOutDate,
+        room_id: roomId,
         adults: bookingInfo.adults,
         children: bookingInfo.children,
         special_requests: bookingInfo.specialRequests
       };
 
-      const booking = await bookRoom(bookingDetails);
-      
-      // Navigate to confirmation page
-      navigate(`/booking-confirmation/${booking.id}`);
+      // Call backend to create Square payment link
+      const res = await fetch(`${API_BASE}/api/create-payment`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bookingData),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url; // Redirect to Square payment page
+      } else {
+        setError('Failed to generate payment link.');
+      }
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'Something went wrong. Try again.');
     } finally {
       setIsProcessing(false);
     }
