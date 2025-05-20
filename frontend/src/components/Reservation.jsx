@@ -15,7 +15,7 @@ const ROOM_DETAILS = {
       'Room Service',
       'King Size Bed',
     ],
-    image: '/king-bedroom.jpg', // Use image from public folder
+    image: '/img-vid/rooms/king-bedroom.png', // Updated image path for King Room
   },
   queen: {
     amenities: [
