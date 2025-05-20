@@ -142,7 +142,7 @@ app.get('/api/available-rooms', async (req, res) => {
   }
 
   try {
-    // 1. Get all rooms of the requested type with all necessary fields
+    // 1. Get all rooms of the requested type
     const { data: rooms, error: roomsError } = await supabase
       .from('rooms')
       .select('id, room_type, max_occupancy, price_per_night, image')
@@ -155,19 +155,30 @@ app.get('/api/available-rooms', async (req, res) => {
       .from('bookings')
       .select('room_id')
       .lt('check_in_date', check_out)
-      .gt('check_out_date', check_in);
+      .gt('check_out_date', check_in)
+      .eq('status', 'confirmed');
 
     if (bookingsError) throw bookingsError;
 
+    // 3. Create a set of booked room IDs for efficient lookup
     const bookedRoomIds = new Set(bookings.map(b => b.room_id));
-    // Add available_count = 1 for each available room (for frontend display)
-    const availableRooms = rooms.filter(room => !bookedRoomIds.has(room.id)).map(room => ({
-      ...room,
-      available_count: 1 // Each room is a single unit
-    }));
 
-    res.json({ availableRooms });
+    // 4. Filter available rooms and add availability count
+    const availableRooms = rooms
+      .filter(room => !bookedRoomIds.has(room.id))
+      .map(room => ({
+        ...room,
+        available_count: 1
+      }));
+
+    // 5. Return the total count and available rooms
+    res.json({
+      total_rooms: rooms.length,
+      available_count: availableRooms.length,
+      availableRooms
+    });
   } catch (err) {
+    console.error('Error fetching available rooms:', err);
     res.status(500).json({ error: err.message });
   }
 });
