@@ -74,12 +74,31 @@ app.post('/api/create-payment', async (req, res) => {
   }
 });
 
+// Helper to check payment status with Square
+async function checkSquarePaymentStatus(transactionId) {
+  try {
+    if (!transactionId) return null;
+    // Try to fetch payment by ID
+    const { result } = await client.paymentsApi.getPayment(transactionId);
+    return result.payment?.status || null;
+  } catch (err) {
+    // If not found as payment, try as order (optional, depending on Square setup)
+    return null;
+  }
+}
+
 // Endpoint to confirm booking after successful payment
 app.post('/api/confirm-booking', async (req, res) => {
-  const bookingDetails = req.body;
+  const { transactionId, ...bookingDetails } = req.body;
 
   try {
-    // Check for overlap (safety)
+    // 1. Verify payment with Square
+    const paymentStatus = await checkSquarePaymentStatus(transactionId);
+    if (paymentStatus !== 'COMPLETED') {
+      return res.status(400).json({ error: 'Payment not completed.' });
+    }
+
+    // 2. Check for overlap (safety)
     const { data: overlapping, error: overlapError } = await supabase
       .from('bookings')
       .select('id')
@@ -92,7 +111,7 @@ app.post('/api/confirm-booking', async (req, res) => {
       return res.status(409).json({ error: 'Room is already booked for these dates.' });
     }
 
-    // Insert booking
+    // 3. Insert booking
     const { data, error } = await supabase
       .from('bookings')
       .insert([{
@@ -106,7 +125,8 @@ app.post('/api/confirm-booking', async (req, res) => {
         children: bookingDetails.children,
         special_requests: bookingDetails.special_requests,
         room_type: bookingDetails.roomType,
-        status: 'confirmed'
+        status: 'confirmed',
+        payment_id: transactionId
       }]);
 
     if (error) return res.status(500).json({ error: error.message });
