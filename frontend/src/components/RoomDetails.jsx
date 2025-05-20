@@ -217,6 +217,13 @@ const RoomDetails = () => {
 
   console.log('Room type:', room.room_type, 'Check-in:', bookingInfo.checkInDate, 'Calculated price:', getRoomPrice(room.room_type, bookingInfo.checkInDate));
 
+  // Image gallery for King Room
+  const kingRoomImages = [
+    '/img-vid/rooms/king-bathroom.png',
+    '/img-vid/rooms/king-bedroom.png',
+    '/img-vid/rooms/king-corner-area.png',
+  ];
+
   return (
     <div className="min-h-screen bg-[#FAF3E0] pt-20 font-['Open_Sans']">
       <div className="max-w-5xl mx-auto px-4 py-12">
@@ -230,13 +237,25 @@ const RoomDetails = () => {
             <div className="md:w-1/2">
               <div className="relative">
                 <Slider {...carouselSettings}>
-                  <div className="relative">
-                    <img
-                      src={room.room_type && room.room_type.toLowerCase() === 'king' ? '/king-bedroom.jpg' : '/queen-bedroom.jpg'}
-                      alt={`${room.room_type} room`}
-                      className="w-full h-[400px] object-cover"
-                    />
-                  </div>
+                  {room.room_type && room.room_type.toLowerCase() === 'king' ? (
+                    kingRoomImages.map((img, idx) => (
+                      <div className="relative" key={img}>
+                        <img
+                          src={img}
+                          alt={`King room photo ${idx + 1}`}
+                          className="w-full h-[400px] object-cover"
+                        />
+                      </div>
+                    ))
+                  ) : (
+                    <div className="relative">
+                      <img
+                        src={'/queen-bedroom.jpg'}
+                        alt={`Queen room`}
+                        className="w-full h-[400px] object-cover"
+                      />
+                    </div>
+                  )}
                 </Slider>
               </div>
             </div>
