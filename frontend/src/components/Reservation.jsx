@@ -27,7 +27,7 @@ const ROOM_DETAILS = {
       'Room Service',
       'Queen Size Bed',
     ],
-    image: '/queen-bedroom.jpg', // Use image from public folder
+    image: '/img-vid/rooms/queen-bedroom.jpg', // Use image from public folder
   },
 };
 
