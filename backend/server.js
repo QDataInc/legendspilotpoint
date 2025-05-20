@@ -89,29 +89,10 @@ async function checkSquarePaymentStatus(transactionId) {
 
 // Endpoint to confirm booking after successful payment
 app.post('/api/confirm-booking', async (req, res) => {
-  const { transactionId, ...bookingDetails } = req.body;
+  const bookingDetails = req.body;
 
   try {
-    // 1. Verify payment with Square
-    const paymentStatus = await checkSquarePaymentStatus(transactionId);
-    if (paymentStatus !== 'COMPLETED') {
-      return res.status(400).json({ error: 'Payment not completed.' });
-    }
-
-    // 2. Check for overlap (safety)
-    const { data: overlapping, error: overlapError } = await supabase
-      .from('bookings')
-      .select('id')
-      .eq('room_id', bookingDetails.room_id)
-      .lt('check_in_date', bookingDetails.checkOutDate)
-      .gt('check_out_date', bookingDetails.checkInDate);
-
-    if (overlapError) return res.status(500).json({ error: overlapError.message });
-    if (overlapping.length > 0) {
-      return res.status(409).json({ error: 'Room is already booked for these dates.' });
-    }
-
-    // 3. Insert booking
+    // Insert booking
     const { data, error } = await supabase
       .from('bookings')
       .insert([{
@@ -125,27 +106,14 @@ app.post('/api/confirm-booking', async (req, res) => {
         children: bookingDetails.children,
         special_requests: bookingDetails.special_requests,
         room_type: bookingDetails.roomType,
-        status: 'confirmed',
-        payment_id: transactionId
+        status: 'confirmed'
       }]);
 
     if (error) return res.status(500).json({ error: error.message });
 
-    // Send confirmation email
-    await transporter.sendMail({
-      from: `Your Hotel <${process.env.EMAIL_USER}>`,
-      to: bookingDetails.email,
-      subject: 'Your Booking is Confirmed!',
-      html: `
-        <p>Thank you for booking with us, <strong>${bookingDetails.guestName}</strong>!</p>
-        <p>Your <strong>${bookingDetails.roomType}</strong> room from <strong>${bookingDetails.checkInDate}</strong> to <strong>${bookingDetails.checkOutDate}</strong> has been confirmed.</p>
-        <p>We look forward to hosting you!</p>
-      `
-    });
-
+    // (Optional) Send confirmation email
     res.json({ success: true });
   } catch (err) {
-    console.error('Error confirming booking:', err);
     res.status(500).json({ error: err.message });
   }
 });
