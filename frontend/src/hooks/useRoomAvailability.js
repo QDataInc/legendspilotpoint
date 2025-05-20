@@ -1,12 +1,14 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 
 export const useRoomAvailability = () => {
   const [availableRooms, setAvailableRooms] = useState([]);
+  const [totalRooms, setTotalRooms] = useState(0);
+  const [availableCount, setAvailableCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   // Fetch available rooms from the backend
-  const fetchAvailableRooms = async (roomType, checkInDate, checkOutDate) => {
+  const fetchAvailableRooms = useCallback(async (roomType, checkInDate, checkOutDate) => {
     setLoading(true);
     setError(null);
     try {
@@ -15,16 +17,21 @@ export const useRoomAvailability = () => {
       );
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to fetch available rooms');
+      
       setAvailableRooms(data.availableRooms);
+      setTotalRooms(data.total_rooms);
+      setAvailableCount(data.available_count);
       return data.availableRooms;
     } catch (err) {
       setError(err.message);
       setAvailableRooms([]);
+      setTotalRooms(0);
+      setAvailableCount(0);
       return [];
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   // Book a room using the backend
   const bookRoom = async (bookingDetails) => {
@@ -38,6 +45,12 @@ export const useRoomAvailability = () => {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Booking failed');
+      
+      // Refresh availability after successful booking
+      if (bookingDetails.check_in_date && bookingDetails.check_out_date) {
+        await fetchAvailableRooms(bookingDetails.room_type, bookingDetails.check_in_date, bookingDetails.check_out_date);
+      }
+      
       return data.booking;
     } catch (err) {
       setError(err.message);
@@ -49,6 +62,8 @@ export const useRoomAvailability = () => {
 
   return {
     availableRooms,
+    totalRooms,
+    availableCount,
     loading,
     error,
     fetchAvailableRooms,

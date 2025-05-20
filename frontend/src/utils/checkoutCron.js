@@ -9,7 +9,7 @@ export const processCheckouts = async () => {
     // Get all bookings where checkout_time has passed
     const { data: expiredBookings, error: fetchError } = await supabase
       .from('bookings')
-      .select('id, room_id')
+      .select('id')
       .lte('check_out_date', new Date().toISOString())
       .eq('status', 'confirmed');
 
@@ -35,19 +35,8 @@ export const processCheckouts = async () => {
 
       if (deleteError) {
         console.error(`Error deleting booking ${booking.id}:`, deleteError);
-        continue;
-      }
-
-      // Update the room status to available
-      const { error: updateError } = await supabase
-        .from('rooms')
-        .update({ status: 'available' })
-        .eq('id', booking.room_id);
-
-      if (updateError) {
-        console.error(`Error updating room ${booking.room_id}:`, updateError);
       } else {
-        console.log(`Successfully processed checkout for booking ${booking.id} and room ${booking.room_id}`);
+        console.log(`Successfully processed checkout for booking ${booking.id}`);
       }
     }
   } catch (error) {
@@ -58,18 +47,17 @@ export const processCheckouts = async () => {
 // For testing purposes, we can export a function to create a test booking
 export const createTestBooking = async () => {
   try {
-    // Get a random available room
-    const { data: availableRooms, error: roomError } = await supabase
+    // Get a random room
+    const { data: rooms, error: roomError } = await supabase
       .from('rooms')
       .select('id, room_type')
-      .eq('status', 'available')
       .limit(1);
 
-    if (roomError || !availableRooms || availableRooms.length === 0) {
-      throw new Error('No available rooms found');
+    if (roomError || !rooms || rooms.length === 0) {
+      throw new Error('No rooms found');
     }
 
-    const room = availableRooms[0];
+    const room = rooms[0];
     const now = new Date();
     const checkoutTime = new Date(now.getTime() + 2 * 60000); // 2 minutes from now
 
@@ -94,16 +82,6 @@ export const createTestBooking = async () => {
 
     if (bookingError) {
       throw bookingError;
-    }
-
-    // Update room status to booked
-    const { error: updateError } = await supabase
-      .from('rooms')
-      .update({ status: 'booked' })
-      .eq('id', room.id);
-
-    if (updateError) {
-      throw updateError;
     }
 
     console.log('Test booking created successfully:', booking);

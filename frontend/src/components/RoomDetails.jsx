@@ -13,7 +13,15 @@ const RoomDetails = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [room, setRoom] = useState(null);
-  const { availability, loading: availabilityLoading, markRoomAsBooked, refreshAvailability } = useRoomAvailability();
+  const { 
+    availableRooms, 
+    totalRooms, 
+    availableCount,
+    loading: availabilityLoading, 
+    error: availabilityError,
+    fetchAvailableRooms, 
+    bookRoom 
+  } = useRoomAvailability();
 
   const searchParams = new URLSearchParams(location.search);
   const checkInDate = searchParams.get('checkIn') || '';
@@ -33,80 +41,39 @@ const RoomDetails = () => {
   });
 
   const [error, setError] = useState('');
-  const [isRoomAvailable, setIsRoomAvailable] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // Set up an interval to run the checkout process every minute
+  // Fetch room details and availability on mount and when dates change
   useEffect(() => {
-    const interval = setInterval(async () => {
+    const fetchRoomAndAvailability = async () => {
       try {
-        // Get all bookings where checkout_time has passed
-        const { data: expiredBookings, error: fetchError } = await supabase
-          .from('bookings')
-          .select('id, room_id')
-          .lte('check_out_date', new Date().toISOString())
-          .eq('status', 'confirmed');
+        // Fetch room details
+        const { data: roomData, error: roomError } = await supabase
+          .from('rooms')
+          .select('*')
+          .eq('id', roomId)
+          .single();
 
-        if (fetchError) {
-          console.error('Error fetching expired bookings:', fetchError);
-          return;
-        }
+        if (roomError) throw roomError;
+        setRoom(roomData);
 
-        if (!expiredBookings || expiredBookings.length === 0) {
-          return;
-        }
-
-        // Process each expired booking
-        for (const booking of expiredBookings) {
-          // Delete the booking
-          const { error: deleteError } = await supabase
-            .from('bookings')
-            .delete()
-            .eq('id', booking.id);
-
-          if (deleteError) {
-            console.error(`Error deleting booking ${booking.id}:`, deleteError);
-            continue;
-          }
-
-          // Update the room status to available
-          const { error: updateError } = await supabase
-            .from('rooms')
-            .update({ status: 'available' })
-            .eq('id', booking.room_id);
-
-          if (updateError) {
-            console.error(`Error updating room ${booking.room_id}:`, updateError);
-          } else {
-            console.log(`Successfully processed checkout for booking ${booking.id} and room ${booking.room_id}`);
-          }
-        }
-
-        // Refresh availability after processing checkouts
+        // Fetch availability if dates are selected
         if (checkInDate && checkOutDate) {
-          refreshAvailability(checkInDate, checkOutDate);
+          await fetchAvailableRooms(roomData.room_type, checkInDate, checkOutDate);
         }
-      } catch (error) {
-        console.error('Error in checkout process:', error);
+      } catch (err) {
+        setError(err.message);
       }
-    }, 60000); // Run every minute
+    };
 
-    return () => clearInterval(interval);
-  }, [checkInDate, checkOutDate, refreshAvailability]);
+    fetchRoomAndAvailability();
+  }, [roomId, checkInDate, checkOutDate, fetchAvailableRooms]);
 
   useEffect(() => {
     if (room && checkInDate && checkOutDate) {
-      refreshAvailability(checkInDate, checkOutDate);
+      fetchAvailableRooms(room.room_type, checkInDate, checkOutDate);
     }
   }, [room, checkInDate, checkOutDate]);
-
-  useEffect(() => {
-    if (room && availability) {
-      const roomType = room.type.toLowerCase().includes('king') ? 'king' : 'queen';
-      const availableCount = availability[roomType]?.available || 0;
-      setIsRoomAvailable(availableCount > 0);
-    }
-  }, [room, availability]);
 
   useEffect(() => {
     setBookingInfo(prev => ({
@@ -139,6 +106,7 @@ const RoomDetails = () => {
   const handleBooking = async () => {
     if (!validateForm()) return;
     setIsProcessing(true);
+    setError('');
 
     try {
       if (!bookingInfo.checkInDate || !bookingInfo.checkOutDate) {
@@ -146,120 +114,29 @@ const RoomDetails = () => {
         return;
       }
 
-      const bookingData = {
-        amount: (checkInDate && checkOutDate) ? getTotalPrice(room.type, checkInDate, checkOutDate) : 0,
+      const bookingDetails = {
+        room_id: roomId,
+        room_type: room.room_type,
+        guest_name: bookingInfo.fullName,
         email: bookingInfo.email,
-        guestName: bookingInfo.fullName,
         phone: bookingInfo.phone,
-        roomType: room.type,
-        checkInDate: bookingInfo.checkInDate,
-        checkOutDate: bookingInfo.checkOutDate,
+        check_in_date: bookingInfo.checkInDate,
+        check_out_date: bookingInfo.checkOutDate,
         adults: bookingInfo.adults,
         children: bookingInfo.children,
-        special_requests: bookingInfo.specialRequests || ''
+        special_requests: bookingInfo.specialRequests
       };
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/create-payment`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(bookingData),
-      });
-
-      const data = await response.json();
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        setError('Failed to generate payment link.');
-      }
+      const booking = await bookRoom(bookingDetails);
+      
+      // Navigate to confirmation page
+      navigate(`/booking-confirmation/${booking.id}`);
     } catch (err) {
-      setError(err.message || 'Something went wrong. Try again.');
+      setError(err.message);
     } finally {
       setIsProcessing(false);
     }
   };
-
-  useEffect(() => {
-    const allRooms =  [
-      {
-        id: 'king1',
-        type: 'Single King Bed',
-        maxOccupancy: '2 Adults, 1 Child',
-        price: 110,
-        amenities: ['Free Wi-Fi', 'City View', 'Mini Bar'],
-        images: [
-          '/img-vid/king-bedroom.jpg',
-          '/img-vid/king-bathroom.jpg',
-          '/img-vid/king-lounge.jpg'
-        ],
-        description: 'Luxurious king room with city views and modern amenities.',
-        size: '400 sq ft',
-        bed: '1 King Bed'
-      },
-      {
-        id: 'king2',
-        type: 'Single King Bed',
-        maxOccupancy: '2 Adults, 1 Child',
-        price: 110,
-        amenities: ['Free Wi-Fi', 'Pool View', 'Mini Bar'],
-        images: [
-          '/img-vid/king-bedroom.jpg',
-          '/img-vid/king-bathroom.jpg',
-          '/img-vid/king-lounge.jpg'
-        ],
-        description: 'Elegant king room overlooking the pool area.',
-        size: '400 sq ft',
-        bed: '1 King Bed'
-      },
-      {
-        id: 'queen1',
-        type: 'Double Queen Bed',
-        maxOccupancy: '4 Adults, 2 Children',
-        price: 110,
-        amenities: ['Free Wi-Fi', 'City View', 'Mini Bar', 'Extra Space'],
-        images: [
-          '/img-vid/queen-bedroom.jpg',
-          '/img-vid/queen-bathroom.jpg',
-          '/img-vid/queen-lounge.jpg'
-        ],
-        description: 'Spacious room with two queen beds and city views.',
-        size: '500 sq ft',
-        bed: '2 Queen Beds'
-      },
-      {
-        id: 'queen2',
-        type: 'Double Queen Bed',
-        maxOccupancy: '4 Adults, 2 Children',
-        price: 110,
-        amenities: ['Free Wi-Fi', 'Pool View', 'Mini Bar', 'Extra Space'],
-        images: [
-          '/img-vid/queen-bedroom.jpg',
-          '/img-vid/queen-bathroom.jpg',
-          '/img-vid/queen-lounge.jpg'
-        ],
-        description: 'Family-friendly room with pool views.',
-        size: '500 sq ft',
-        bed: '2 Queen Beds'
-      },
-      {
-        id: 'queen3',
-        type: 'Double Queen Bed',
-        maxOccupancy: '4 Adults, 2 Children',
-        price: 110,
-        amenities: ['Free Wi-Fi', 'Garden View', 'Mini Bar', 'Extra Space'],
-        images: [
-          '/img-vid/queen-bedroom.jpg',
-          '/img-vid/queen-bathroom.jpg',
-          '/img-vid/queen-lounge.jpg'
-        ],
-        description: 'Perfect for families with garden views.',
-        size: '500 sq ft',
-        bed: '2 Queen Beds'
-      }
-    ];
-
-    const foundRoom = allRooms.find(r => r.id === roomId);
-    setRoom(foundRoom);
-  }, [roomId]);
 
   if (!room) return (
     <div className="pt-20 text-center">
@@ -324,7 +201,7 @@ const RoomDetails = () => {
     return nights.reduce((sum, date) => sum + getRoomPrice(roomType, date.toISOString().slice(0, 10)), 0);
   }
 
-  console.log('Room type:', room.type, 'Check-in:', bookingInfo.checkInDate, 'Calculated price:', getRoomPrice(room.type, bookingInfo.checkInDate));
+  console.log('Room type:', room.room_type, 'Check-in:', bookingInfo.checkInDate, 'Calculated price:', getRoomPrice(room.room_type, bookingInfo.checkInDate));
 
   return (
     <div className="min-h-screen bg-[#FAF3E0] pt-20 font-['Open_Sans']">
@@ -343,7 +220,7 @@ const RoomDetails = () => {
                     <div key={index} className="relative">
                       <img
                         src={image}
-                        alt={`${room.type} - View ${index + 1}`}
+                        alt={`${room.room_type} - View ${index + 1}`}
                         className="w-full h-[400px] object-cover"
                       />
                     </div>
@@ -352,7 +229,7 @@ const RoomDetails = () => {
               </div>
             </div>
             <div className="md:w-1/2 p-8 bg-[#FFF8F0]">
-              <h1 className="text-3xl font-['Cinzel'] font-bold text-[#8B2500] mb-4">{room.type}</h1>
+              <h1 className="text-3xl font-['Cinzel'] font-bold text-[#8B2500] mb-4">{room.room_type}</h1>
               <p className="text-gray-700 mb-6">{room.description}</p>
               
               <div className="mb-8">
@@ -380,7 +257,7 @@ const RoomDetails = () => {
                   </li>
                   {/* Price for selected night */}
                   <li className="text-[#F56A00] font-bold text-2xl mt-4">
-                    {(checkInDate && checkOutDate) ? `Total for stay: $${getTotalPrice(room.type, checkInDate, checkOutDate)}+tax` : 'Select dates'}
+                    {(checkInDate && checkOutDate) ? `Total for stay: $${getTotalPrice(room.room_type, checkInDate, checkOutDate)}+tax` : 'Select dates'}
                   </li>
                   <div className="flex items-center mt-2 text-green-700 font-medium text-base">
                     <svg className="mr-1" width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -411,17 +288,47 @@ const RoomDetails = () => {
               <motion.div 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className={`mb-6 text-lg font-semibold ${isRoomAvailable ? 'text-green-700' : 'text-red-700'}`}
+                className={`mb-6 p-4 rounded-lg ${
+                  availableCount > 0 
+                    ? 'bg-green-50 border border-green-200 text-green-700' 
+                    : 'bg-red-50 border border-red-200 text-red-700'
+                }`}
               >
-                {isRoomAvailable ? (
-                  `${availability[room.type.toLowerCase().includes('king') ? 'king' : 'queen']?.available} rooms available`
+                {availableCount > 0 ? (
+                  <div>
+                    <p className="font-semibold">Rooms Available</p>
+                    <p>{availableCount} of {totalRooms} {room?.room_type} rooms available for your selected dates</p>
+                  </div>
                 ) : (
-                  'No rooms available for these dates'
+                  <div>
+                    <p className="font-semibold">No Rooms Available</p>
+                    <p>All {room?.room_type} rooms are booked for your selected dates</p>
+                  </div>
                 )}
               </motion.div>
             )}
 
-            {isRoomAvailable ? (
+            {availabilityError && (
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg"
+              >
+                {availabilityError}
+              </motion.div>
+            )}
+
+            {isProcessing ? (
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-gray-400 cursor-not-allowed rounded-xl p-8 text-center"
+              >
+                <p className="text-gray-700 text-lg font-semibold">
+                  Processing...
+                </p>
+              </motion.div>
+            ) : (
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -522,24 +429,6 @@ const RoomDetails = () => {
                   } text-white px-8 py-4 rounded-lg transition duration-300 text-lg font-semibold shadow-lg hover:shadow-xl`}
                 >
                   {isProcessing ? 'Processing...' : 'Confirm Booking'}
-                </motion.button>
-              </motion.div>
-            ) : (
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-red-50 border border-red-200 rounded-xl p-8 text-center"
-              >
-                <p className="text-red-700 text-lg font-semibold">
-                  Sorry, this room type is currently fully booked.
-                </p>
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => navigate('/reservation')}
-                  className="mt-4 bg-[#F56A00] text-white px-8 py-4 rounded-lg hover:bg-[#E05F00] transition duration-300 text-lg font-semibold shadow-lg hover:shadow-xl"
-                >
-                  Check Other Room Types
                 </motion.button>
               </motion.div>
             )}
