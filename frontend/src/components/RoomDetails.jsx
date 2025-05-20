@@ -235,15 +235,7 @@ const RoomDetails = () => {
                 <ul className="space-y-3">
                   <li className="text-gray-700 flex items-center">
                     <span className="w-2 h-2 bg-[#F56A00] rounded-full mr-3"></span>
-                    Size: {room.size}
-                  </li>
-                  <li className="text-gray-700 flex items-center">
-                    <span className="w-2 h-2 bg-[#F56A00] rounded-full mr-3"></span>
-                    Bed: {room.bed}
-                  </li>
-                  <li className="text-gray-700 flex items-center">
-                    <span className="w-2 h-2 bg-[#F56A00] rounded-full mr-3"></span>
-                    Max Occupancy: {room.maxOccupancy}
+                    Max Occupancy: {room.max_occupancy}
                   </li>
                   <li className="text-gray-700 flex items-center">
                     <span className="w-2 h-2 bg-[#F56A00] rounded-full mr-3"></span>
