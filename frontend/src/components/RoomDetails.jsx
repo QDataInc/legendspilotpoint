@@ -120,6 +120,7 @@ const RoomDetails = () => {
         amount: getTotalPrice(room.room_type, bookingInfo.checkInDate, bookingInfo.checkOutDate),
         email: bookingInfo.email,
         guestName: bookingInfo.fullName,
+        phone: bookingInfo.phone,
         roomType: room.room_type,
         checkInDate: bookingInfo.checkInDate,
         checkOutDate: bookingInfo.checkOutDate,
