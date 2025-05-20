@@ -216,15 +216,13 @@ const RoomDetails = () => {
             <div className="md:w-1/2">
               <div className="relative">
                 <Slider {...carouselSettings}>
-                  {room.images.map((image, index) => (
-                    <div key={index} className="relative">
-                      <img
-                        src={image}
-                        alt={`${room.room_type} - View ${index + 1}`}
-                        className="w-full h-[400px] object-cover"
-                      />
-                    </div>
-                  ))}
+                  <div className="relative">
+                    <img
+                      src={room.room_type && room.room_type.toLowerCase() === 'king' ? '/king-bedroom.jpg' : '/queen-bedroom.jpg'}
+                      alt={`${room.room_type} room`}
+                      className="w-full h-[400px] object-cover"
+                    />
+                  </div>
                 </Slider>
               </div>
             </div>
