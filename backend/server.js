@@ -146,7 +146,7 @@ app.get('/api/available-rooms', async (req, res) => {
     const { data: rooms, error: roomsError } = await supabase
       .from('rooms')
       .select('id, room_type, max_occupancy, price_per_night, image')
-      .eq('room_type', room_type);
+      .ilike('room_type', room_type);
 
     if (roomsError) throw roomsError;
 
