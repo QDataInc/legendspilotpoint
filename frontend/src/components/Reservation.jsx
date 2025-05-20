@@ -46,6 +46,7 @@ const Reservation = () => {
   });
 
   const { fetchAvailableRooms, availableRooms, loading, error: availError } = useRoomAvailability();
+  const [allAvailableRooms, setAllAvailableRooms] = useState([]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -93,10 +94,13 @@ const Reservation = () => {
   };
 
   const handleSearch = async () => {
+    console.log('handleSearch called with:', searchParams);
     if (validateDates()) {
       try {
-        await fetchAvailableRooms('king', searchParams.checkIn, searchParams.checkOut);
-        await fetchAvailableRooms('queen', searchParams.checkIn, searchParams.checkOut);
+        const kingRooms = await fetchAvailableRooms('king', searchParams.checkIn, searchParams.checkOut);
+        const queenRooms = await fetchAvailableRooms('queen', searchParams.checkIn, searchParams.checkOut);
+        const combinedRooms = [...kingRooms, ...queenRooms];
+        setAllAvailableRooms(combinedRooms);
         setShowRooms(true);
         setShowGuestModal(false);
       } catch (err) {
@@ -123,7 +127,7 @@ const Reservation = () => {
   const today = new Date().toISOString().split('T')[0];
 
   // Group available rooms by type for display
-  const groupedRooms = availableRooms.reduce((acc, room) => {
+  const groupedRooms = allAvailableRooms.reduce((acc, room) => {
     const type = room.room_type.toLowerCase();
     if (!acc[type]) acc[type] = [];
     acc[type].push(room);
