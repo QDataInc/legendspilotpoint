@@ -223,6 +223,12 @@ const RoomDetails = () => {
     '/img-vid/rooms/king-corner-area.png',
     '/img-vid/rooms/king-bathroom.png',
   ];
+  // Image gallery for Queen Room
+  const queenRoomImages = [
+    '/img-vid/rooms/queen-bedroom.png',
+    '/img-vid/rooms/queen-corner-area.png',
+    '/img-vid/rooms/queen-bathroom.png',
+  ];
 
   return (
     <div className="min-h-screen bg-[#FAF3E0] pt-20 font-['Open_Sans']">
@@ -247,15 +253,17 @@ const RoomDetails = () => {
                         />
                       </div>
                     ))
-                  ) : (
-                    <div className="relative">
-                      <img
-                        src={'/queen-bedroom.jpg'}
-                        alt={`Queen room`}
-                        className="w-full h-[400px] object-cover"
-                      />
-                    </div>
-                  )}
+                  ) : room.room_type && room.room_type.toLowerCase() === 'queen' ? (
+                    queenRoomImages.map((img, idx) => (
+                      <div className="relative" key={img}>
+                        <img
+                          src={img}
+                          alt={`Queen room photo ${idx + 1}`}
+                          className="w-full h-[400px] object-cover"
+                        />
+                      </div>
+                    ))
+                  ) : null}
                 </Slider>
               </div>
             </div>
