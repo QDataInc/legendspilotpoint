@@ -9,16 +9,18 @@ const Confirmation = () => {
   useEffect(() => {
     // Retrieve booking info from localStorage
     const bookingInfo = JSON.parse(localStorage.getItem('pendingBooking'));
-    if (!bookingInfo) {
+    const params = new URLSearchParams(window.location.search);
+    const transactionId = params.get('transactionId') || params.get('orderId');
+    if (!bookingInfo || !transactionId) {
       setStatus('error');
-      setError('No booking information found.');
+      setError('No booking information or transaction ID found.');
       return;
     }
-    // Call backend to finalize booking
+    // Call backend to finalize booking and verify payment
     fetch(`${import.meta.env.VITE_API_URL}/api/confirm-booking`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(bookingInfo)
+      body: JSON.stringify({ ...bookingInfo, transactionId })
     })
       .then(res => res.json())
       .then(data => {
