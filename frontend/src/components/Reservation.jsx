@@ -15,7 +15,7 @@ const ROOM_DETAILS = {
       'Room Service',
       'King Size Bed',
     ],
-    image: '/images/king-room.jpg', // Update with your actual image path
+    image: '/king-bedroom.jpg', // Use image from public folder
   },
   queen: {
     amenities: [
@@ -27,7 +27,7 @@ const ROOM_DETAILS = {
       'Room Service',
       'Queen Size Bed',
     ],
-    image: '/images/queen-room.jpg', // Update with your actual image path
+    image: '/queen-bedroom.jpg', // Use image from public folder
   },
 };
 
@@ -324,34 +324,32 @@ const Reservation = () => {
                     {rooms.map((room) => (
                       <div
                         key={room.id}
-                        className="bg-white rounded-xl shadow-lg overflow-hidden border border-[#D8CFC4] mb-4"
+                        className="bg-white rounded-xl shadow-lg overflow-hidden border border-[#D8CFC4] mb-4 flex flex-col"
                       >
+                        {/* Room Image */}
                         <img
                           src={ROOM_DETAILS[type].image}
                           alt={`${type} room`}
-                          className="w-full h-64 object-cover"
+                          className="w-full h-56 object-cover"
+                          style={{ objectPosition: 'center' }}
                         />
-                        <div className="p-6">
-                          <div className="flex justify-between items-start mb-4">
-                            <div>
-                              <h4 className="text-2xl font-['Cinzel'] text-[#2E2E2E] font-bold">{type.charAt(0).toUpperCase() + type.slice(1)}</h4>
-                              <p className="text-gray-600 mt-2">Max Occupancy: {room.max_occupancy}</p>
-                              <div className={`mt-2 ${room.available_count === 0 ? 'text-red-600' : 'text-green-600'} font-semibold`}>
-                                {room.available_count === 0 ? (
-                                  'No rooms available'
-                                ) : (
-                                  `${room.available_count} ${room.available_count === 1 ? 'room' : 'rooms'} available`
-                                )}
-                              </div>
+                        <div className="p-6 flex-1 flex flex-col justify-between">
+                          <div>
+                            <h4 className="text-2xl font-['Cinzel'] text-[#2E2E2E] font-bold mb-2">{type.charAt(0).toUpperCase() + type.slice(1)} Room</h4>
+                            <p className="text-gray-600 mb-2">Max Occupancy: {room.max_occupancy}</p>
+                            <div className={`mb-2 ${room.available_count === 0 ? 'text-red-600' : 'text-green-600'} font-semibold`}>
+                              {room.available_count === 0 ? (
+                                'No rooms available'
+                              ) : (
+                                `${room.available_count} ${room.available_count === 1 ? 'room' : 'rooms'} available`
+                              )}
                             </div>
-                            <p className="text-2xl font-bold text-[#F56A00]">
+                            <p className="text-2xl font-bold text-[#F56A00] mb-2">
                               ${getRoomPrice(type, searchParams.checkIn || new Date())}/night
                             </p>
-                          </div>
-                          <div className="mt-4">
                             <h5 className="text-[#2E2E2E] font-semibold mb-2">Amenities:</h5>
-                            <ul className="space-y-2 text-base">
-                              {ROOM_DETAILS[type].amenities.map(a => <li key={a}>{a}</li>)}
+                            <ul className="space-y-1 text-base mb-2">
+                              {ROOM_DETAILS[type].amenities.map(a => <li key={a}>• {a}</li>)}
                             </ul>
                           </div>
                           {room.available_count > 0 ? (
@@ -362,14 +360,14 @@ const Reservation = () => {
                                 adults: searchParams.adults,
                                 children: searchParams.children
                               }).toString()}`}
-                              className="mt-6 block w-full bg-[#F56A00] text-white text-center px-6 py-3 rounded-lg hover:bg-[#E05F00] transition duration-300"
+                              className="mt-4 block w-full bg-[#F56A00] text-white text-center px-6 py-3 rounded-lg hover:bg-[#E05F00] transition duration-300 font-bold"
                             >
                               Book Now
                             </Link>
                           ) : (
                             <button
                               disabled
-                              className="mt-6 block w-full bg-gray-400 text-white text-center px-6 py-3 rounded-lg cursor-not-allowed"
+                              className="mt-4 block w-full bg-gray-400 text-white text-center px-6 py-3 rounded-lg cursor-not-allowed font-bold"
                             >
                               Fully Booked
                             </button>
