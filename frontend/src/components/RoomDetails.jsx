@@ -219,9 +219,9 @@ const RoomDetails = () => {
 
   // Image gallery for King Room
   const kingRoomImages = [
-    '/img-vid/rooms/king-bathroom.png',
     '/img-vid/rooms/king-bedroom.png',
     '/img-vid/rooms/king-corner-area.png',
+    '/img-vid/rooms/king-bathroom.png',
   ];
 
   return (
