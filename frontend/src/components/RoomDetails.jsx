@@ -129,6 +129,9 @@ const RoomDetails = () => {
         special_requests: bookingInfo.specialRequests
       };
 
+      // Store booking data in localStorage
+      localStorage.setItem('pendingBooking', JSON.stringify(bookingData));
+
       // Call backend to create Square payment link
       const res = await fetch(`${API_BASE}/api/create-payment`, {
         method: 'POST',
@@ -283,41 +286,6 @@ const RoomDetails = () => {
           <div className="p-8 bg-[#FAF3E0] border-t border-[#D8CFC4]">
             <h2 className="text-2xl font-['Cinzel'] font-bold text-[#8B2500] mb-6">Complete Your Booking</h2>
             
-            {/* Availability Status */}
-            {!availabilityLoading && (
-              <motion.div 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className={`mb-6 p-4 rounded-lg ${
-                  availableCount > 0 
-                    ? 'bg-green-50 border border-green-200 text-green-700' 
-                    : 'bg-red-50 border border-red-200 text-red-700'
-                }`}
-              >
-                {availableCount > 0 ? (
-                  <div>
-                    <p className="font-semibold">Rooms Available</p>
-                    <p>{availableCount} of {totalRooms} {room?.room_type} rooms available for your selected dates</p>
-                  </div>
-                ) : (
-                  <div>
-                    <p className="font-semibold">No Rooms Available</p>
-                    <p>All {room?.room_type} rooms are booked for your selected dates</p>
-                  </div>
-                )}
-              </motion.div>
-            )}
-
-            {availabilityError && (
-              <motion.div 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg"
-              >
-                {availabilityError}
-              </motion.div>
-            )}
-
             {isProcessing ? (
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}

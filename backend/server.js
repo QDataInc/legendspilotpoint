@@ -77,22 +77,46 @@ app.post('/api/create-payment', async (req, res) => {
 // Square webhook endpoint for payment confirmation and booking
 app.post('/api/square-webhook', express.json(), async (req, res) => {
   const event = req.body;
+  const signature = req.headers['x-square-hmacsha256-signature'];
 
-  // 1. (Optional) Verify webhook signature for security
+  // 1. Verify webhook signature for security
+  try {
+    const isValid = await client.webhooks.verifyWebhookSignature({
+      webhookSignature: signature,
+      webhookSignatureKey: process.env.SQUARE_WEBHOOK_SIGNATURE_KEY,
+      webhookEventPayload: JSON.stringify(event)
+    });
+    
+    if (!isValid) {
+      console.error('Invalid webhook signature');
+      return res.status(401).json({ error: 'Invalid signature' });
+    }
+  } catch (err) {
+    console.error('Error verifying webhook signature:', err);
+    return res.status(401).json({ error: 'Invalid signature' });
+  }
 
   // 2. Check for payment completion
   if (
     event.type === 'payment.updated' &&
-    event.data.object.payment.status === 'COMPLETED'
+    event.data?.object?.payment?.status === 'COMPLETED'
   ) {
     const payment = event.data.object.payment;
+    console.log('Processing completed payment:', payment.id);
 
     // 3. Extract booking details from payment note
     let bookingDetails;
     try {
-      bookingDetails = JSON.parse(payment.note);
+      bookingDetails = JSON.parse(payment.note || '{}');
+      console.log('Booking details:', bookingDetails);
     } catch (e) {
+      console.error('Invalid booking details in payment note:', e);
       return res.status(400).json({ error: 'Invalid booking details in payment note.' });
+    }
+
+    if (!bookingDetails.room_id || !bookingDetails.check_in_date) {
+      console.error('Missing required booking details');
+      return res.status(400).json({ error: 'Missing required booking details' });
     }
 
     // 4. Check for overlap (safety)
@@ -103,35 +127,122 @@ app.post('/api/square-webhook', express.json(), async (req, res) => {
       .lt('check_in_date', bookingDetails.check_out_date)
       .gt('check_out_date', bookingDetails.check_in_date);
 
-    if (overlapError) return res.status(500).json({ error: overlapError.message });
-    if (overlapping.length > 0) {
-      // Optionally refund or flag for manual review
+    if (overlapError) {
+      console.error('Error checking for overlapping bookings:', overlapError);
+      return res.status(500).json({ error: overlapError.message });
+    }
+    
+    if (overlapping?.length > 0) {
+      console.error('Room already booked for these dates');
       return res.status(409).json({ error: 'Room is already booked for these dates.' });
     }
 
     // 5. Insert booking
     const { data, error } = await supabase
       .from('bookings')
-      .insert([{ ...bookingDetails, status: 'confirmed' }]);
+      .insert([{
+        room_id: bookingDetails.room_id,
+        guest_name: bookingDetails.guest_name,
+        email: bookingDetails.email,
+        check_in_date: bookingDetails.check_in_date,
+        check_out_date: bookingDetails.check_out_date,
+        adults: bookingDetails.adults,
+        children: bookingDetails.children,
+        special_requests: bookingDetails.special_requests,
+        room_type: bookingDetails.room_type,
+        status: 'confirmed',
+        payment_id: payment.id,
+        amount_paid: payment.amountMoney.amount / 100 // Convert from cents to dollars
+      }])
+      .select();
+
+    if (error) {
+      console.error('Error inserting booking:', error);
+      return res.status(500).json({ error: error.message });
+    }
+
+    console.log('Booking created successfully:', data[0].id);
+
+    // 6. Send confirmation email
+    try {
+      await transporter.sendMail({
+        from: `Your Hotel <${process.env.EMAIL_USER}>`,
+        to: bookingDetails.email,
+        subject: 'Your Booking is Confirmed!',
+        html: `
+          <p>Thank you for booking with us, <strong>${bookingDetails.guest_name}</strong>!</p>
+          <p>Your <strong>${bookingDetails.room_type}</strong> room from <strong>${bookingDetails.check_in_date}</strong> to <strong>${bookingDetails.check_out_date}</strong> has been confirmed.</p>
+          <p>Payment ID: ${payment.id}</p>
+          <p>Amount Paid: $${payment.amountMoney.amount / 100}</p>
+          <p>We look forward to hosting you!</p>
+        `
+      });
+      console.log('Confirmation email sent to:', bookingDetails.email);
+    } catch (emailError) {
+      console.error('Error sending confirmation email:', emailError);
+      // Don't return error response here, booking is still successful
+    }
+
+    return res.status(200).json({ success: true });
+  }
+
+  // Return 200 for other event types we don't handle
+  res.status(200).json({ received: true });
+});
+
+// Endpoint to confirm booking after successful payment
+app.post('/api/confirm-booking', async (req, res) => {
+  const bookingDetails = req.body;
+
+  try {
+    // Check for overlap (safety)
+    const { data: overlapping, error: overlapError } = await supabase
+      .from('bookings')
+      .select('id')
+      .eq('room_id', bookingDetails.room_id)
+      .lt('check_in_date', bookingDetails.checkOutDate)
+      .gt('check_out_date', bookingDetails.checkInDate);
+
+    if (overlapError) return res.status(500).json({ error: overlapError.message });
+    if (overlapping.length > 0) {
+      return res.status(409).json({ error: 'Room is already booked for these dates.' });
+    }
+
+    // Insert booking
+    const { data, error } = await supabase
+      .from('bookings')
+      .insert([{
+        room_id: bookingDetails.room_id,
+        guest_name: bookingDetails.guestName,
+        email: bookingDetails.email,
+        check_in_date: bookingDetails.checkInDate,
+        check_out_date: bookingDetails.checkOutDate,
+        adults: bookingDetails.adults,
+        children: bookingDetails.children,
+        special_requests: bookingDetails.special_requests,
+        room_type: bookingDetails.roomType,
+        status: 'confirmed'
+      }]);
 
     if (error) return res.status(500).json({ error: error.message });
 
-    // 6. Send confirmation email
+    // Send confirmation email
     await transporter.sendMail({
       from: `Your Hotel <${process.env.EMAIL_USER}>`,
       to: bookingDetails.email,
       subject: 'Your Booking is Confirmed!',
       html: `
-        <p>Thank you for booking with us, <strong>${bookingDetails.guest_name}</strong>!</p>
-        <p>Your <strong>${bookingDetails.room_type}</strong> room from <strong>${bookingDetails.check_in_date}</strong> to <strong>${bookingDetails.check_out_date}</strong> has been confirmed.</p>
+        <p>Thank you for booking with us, <strong>${bookingDetails.guestName}</strong>!</p>
+        <p>Your <strong>${bookingDetails.roomType}</strong> room from <strong>${bookingDetails.checkInDate}</strong> to <strong>${bookingDetails.checkOutDate}</strong> has been confirmed.</p>
         <p>We look forward to hosting you!</p>
       `
     });
 
-    return res.status(200).json({ success: true });
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Error confirming booking:', err);
+    res.status(500).json({ error: err.message });
   }
-
-  res.status(200).json({ received: true });
 });
 
 // GET /api/available-rooms?room_type=king&check_in=2025-05-21&check_out=2025-05-22
