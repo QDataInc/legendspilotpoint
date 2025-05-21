@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabaseClient";
 import { motion, AnimatePresence } from "framer-motion";
@@ -12,16 +12,28 @@ const Navbar = () => {
   const isReservationPage = location.pathname === '/Reservation';
   const isAdminPage = location.pathname === '/admin';
   const isRoomDetailsPage = location.pathname.startsWith('/room-details/');
+  const [showHeader, setShowHeader] = useState(true);
+  const lastScrollY = useRef(window.scrollY);
 
   useEffect(() => {
+    let ticking = false;
     const handleScroll = () => {
-      if (window.scrollY > 100) {
-        setScrolling(true);
-      } else {
-        setScrolling(false);
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const currentScrollY = window.scrollY;
+          if (currentScrollY <= 0) {
+            setShowHeader(true);
+          } else if (currentScrollY > lastScrollY.current) {
+            setShowHeader(false); // scrolling down
+          } else if (currentScrollY < lastScrollY.current) {
+            setShowHeader(true); // scrolling up
+          }
+          lastScrollY.current = currentScrollY;
+          ticking = false;
+        });
+        ticking = true;
       }
     };
-
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -165,8 +177,9 @@ const Navbar = () => {
   return (
     <div className={isAdminPage ? 'relative z-50' : ''}>
       <motion.nav
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
+        initial={{ y: 0 }}
+        animate={{ y: showHeader ? 0 : "-100%" }}
+        transition={{ type: "tween", duration: 0.3 }}
         className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-black/80"
       >
         <div className="container mx-auto flex justify-between items-center px-6 py-4">
