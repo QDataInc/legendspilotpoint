@@ -144,7 +144,7 @@ function App() {
         )}
         <Navbar className="flex flex-col min-h-screen"></Navbar>
         <div className="flex flex-col min-h-screen">
-          <main className="flex-grow">
+          <main className="flex-grow pt-28">
             <Routes>
               <Route path="/" element={<HomePage></HomePage>}></Route>
               <Route path="/Menu" element={<Menu></Menu>}></Route>
