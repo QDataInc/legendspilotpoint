@@ -3,6 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../context/AuthContext';
 
+// Helper to parse YYYY-MM-DD as a local date
+function parseLocalDate(dateString) {
+  if (!dateString) return '';
+  const [year, month, day] = dateString.split('-');
+  return new Date(year, month - 1, day);
+}
+
 const AdminDashboard = () => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -120,10 +127,10 @@ const AdminDashboard = () => {
                   {booking.room_type}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {new Date(booking.check_in_date).toLocaleDateString()}
+                  {parseLocalDate(booking.check_in_date).toLocaleDateString()}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {new Date(booking.check_out_date).toLocaleDateString()}
+                  {parseLocalDate(booking.check_out_date).toLocaleDateString()}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
