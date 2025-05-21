@@ -167,7 +167,9 @@ const Navbar = () => {
       <motion.nav
         initial={{ y: -100 }}
         animate={{ y: 0 }}
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-black/30 backdrop-blur-md`}
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+          scrolling ? "bg-black/80 backdrop-blur-md" : "bg-black/40 backdrop-blur-sm"
+        }`}
       >
         <div className="container mx-auto flex justify-between items-center px-6 py-4">
           <motion.button 
