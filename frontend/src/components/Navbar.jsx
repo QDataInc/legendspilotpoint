@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabaseClient";
 import { motion, AnimatePresence } from "framer-motion";
+import { HiOutlineMenu, HiOutlineX } from 'react-icons/hi';
 
 const Navbar = () => {
   const [scrolling, setScrolling] = useState(false);
@@ -197,58 +198,59 @@ const Navbar = () => {
           )}
 
           {!isAdminPage && !isRoomDetailsPage && (
-            <>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="md:hidden text-white focus:outline-none"
-                onClick={() => setMenuOpen(!menuOpen)}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  className="w-8 h-8"
-                >
-                  {menuOpen ? (
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  ) : (
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M4 6h16M4 12h16m-7 6h7"
-                    />
-                  )}
-                </svg>
-              </motion.button>
-
-              <div className="hidden md:flex space-x-6">
-                {renderNavLinks()}
-              </div>
-
-              <AnimatePresence>
-                {menuOpen && (
-                  <motion.div 
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    className="absolute top-full left-0 w-full bg-black/90 backdrop-blur-md text-white py-4 px-6 md:hidden"
-                  >
-                    {renderMobileMenu()}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </>
+            <button
+              className="text-white text-4xl focus:outline-none z-50"
+              onClick={() => setMenuOpen(true)}
+              aria-label="Open menu"
+            >
+              <HiOutlineMenu />
+            </button>
           )}
         </div>
       </motion.nav>
+
+      <AnimatePresence>
+        {menuOpen && !isAdminPage && !isRoomDetailsPage && (
+          <motion.aside
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={{ type: 'tween', duration: 0.3 }}
+            className="fixed top-0 right-0 h-full w-80 max-w-full bg-black/90 text-white z-[100] shadow-2xl flex flex-col"
+          >
+            <div className="flex items-center justify-between px-6 py-6 border-b border-white/10">
+              <span className="text-2xl font-bold tracking-wide">Menu</span>
+              <button
+                className="text-white text-3xl focus:outline-none"
+                onClick={() => setMenuOpen(false)}
+                aria-label="Close menu"
+              >
+                <HiOutlineX />
+              </button>
+            </div>
+            <nav className="flex-1 flex flex-col gap-2 px-8 py-8">
+              {[
+                { path: "/Menu", label: "Menu" },
+                { path: "/Catering", label: "Catering" },
+                { path: "/PrivateDining", label: "Private Dining" },
+                { path: "/Events", label: "Events" },
+                { path: "/AboutUs", label: "About Us" },
+                { path: "/Reservation", label: "Hotel Reservation" }
+              ].map((item) => (
+                <motion.button
+                  key={item.path}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => handleNavigation(item.path)}
+                  className="w-full text-left py-3 px-2 text-lg font-semibold rounded hover:bg-white/10 transition-colors duration-200"
+                >
+                  {item.label}
+                </motion.button>
+              ))}
+            </nav>
+          </motion.aside>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
