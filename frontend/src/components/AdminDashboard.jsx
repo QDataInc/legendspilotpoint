@@ -120,10 +120,10 @@ const AdminDashboard = () => {
                   {booking.room_type}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {new Date(booking.check_in).toLocaleDateString()}
+                  {new Date(booking.check_in_date).toLocaleDateString()}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {new Date(booking.check_out).toLocaleDateString()}
+                  {new Date(booking.check_out_date).toLocaleDateString()}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
