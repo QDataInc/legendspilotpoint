@@ -219,7 +219,7 @@ const Navbar = () => {
             className="fixed top-0 right-0 h-full w-80 max-w-full bg-black/90 text-white z-[100] shadow-2xl flex flex-col"
           >
             <div className="flex items-center justify-between px-6 py-6 border-b border-white/10">
-              <span className="text-2xl font-bold tracking-wide">Menu</span>
+             
               <button
                 className="text-white text-3xl focus:outline-none"
                 onClick={() => setMenuOpen(false)}
