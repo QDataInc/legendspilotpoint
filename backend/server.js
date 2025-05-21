@@ -111,7 +111,25 @@ app.post('/api/confirm-booking', async (req, res) => {
 
     if (error) return res.status(500).json({ error: error.message });
 
-    // (Optional) Send confirmation email
+    // Send confirmation email
+    try {
+      await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: bookingDetails.email,
+        subject: 'Booking Confirmation - Legends Pilot Point',
+        html: `
+          <p>Thank you for your booking, <b>${bookingDetails.guestName}</b>!</p>
+          <p>Your check-in date: <b>${bookingDetails.checkInDate}</b></p>
+          <p>Your check-out date: <b>${bookingDetails.checkOutDate}</b></p>
+          <p>Your room has been reserved and we look forward to hosting you.</p>
+          <p>Best regards,<br/>Legends Pilot Point Team</p>
+        `,
+      });
+    } catch (emailError) {
+      console.error('Failed to send confirmation email:', emailError);
+      // Optionally, you can still return success, or return a warning to the frontend
+    }
+
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
