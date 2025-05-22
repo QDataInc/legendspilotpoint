@@ -4,12 +4,12 @@ import { Link } from 'react-router-dom';
 
 const Footer = () => {
   return (
-    <footer className="relative bg-[#1A1A1A] text-white py-12">
+    <footer className="relative bg-[#1A1A1A] text-white py-6">
       {/* Wood texture overlay */}
       <div className="absolute inset-0 opacity-10 bg-[url('/img-vid/wood-texture.jpg')] bg-repeat"></div>
       
       <div className="container mx-auto px-4 relative z-10">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {/* Restaurant Info */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -17,7 +17,7 @@ const Footer = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
           >
-            <h2 className="text-2xl font-['Cinzel'] font-semibold mb-4 text-[#F56A00]">
+            <h2 className="text-xl font-['Cinzel'] font-semibold mb-2 text-[#F56A00]">
               Four Horsemen Restaurant
             </h2>
             <p className="text-gray-400 leading-relaxed">
@@ -33,8 +33,8 @@ const Footer = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.1 }}
           >
-            <h2 className="text-2xl font-['Cinzel'] font-semibold mb-4 text-[#F56A00]">Explore Our Menu</h2>
-            <ul className="space-y-3">
+            <h2 className="text-xl font-['Cinzel'] font-semibold mb-2 text-[#F56A00]">Explore Our Menu</h2>
+            <ul className="space-y-1">
               {[
                 { label: 'Full Menu', path: '/menu' },
                 { label: 'Catering Services', path: '/catering' }
@@ -61,8 +61,8 @@ const Footer = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <h2 className="text-2xl font-['Cinzel'] font-semibold mb-4 text-[#F56A00]">Contact Us</h2>
-            <div className="space-y-3">
+            <h2 className="text-xl font-['Cinzel'] font-semibold mb-2 text-[#F56A00]">Contact Us</h2>
+            <div className="space-y-1">
               <motion.p 
                 whileHover={{ x: 5 }}
                 className="text-gray-400 flex items-center"
@@ -94,7 +94,7 @@ const Footer = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.3 }}
           >
-            <h2 className="text-2xl font-['Cinzel'] font-semibold mb-4 text-[#F56A00]">Follow Us</h2>
+            <h2 className="text-xl font-['Cinzel'] font-semibold mb-2 text-[#F56A00]">Follow Us</h2>
             <div className="flex space-x-4">
               {[
                 { icon: FaFacebook, label: 'Facebook', url: 'https://facebook.com' },
@@ -121,7 +121,7 @@ const Footer = () => {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.4 }}
-          className="mt-12 pt-8 border-t border-gray-800 text-center"
+          className="mt-6 pt-4 border-t border-gray-800 text-center text-sm"
         >
           <p className="text-gray-400">
             &copy; {new Date().getFullYear()} Four Horsemen Restaurant. All rights reserved.
