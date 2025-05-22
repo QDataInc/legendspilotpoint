@@ -34,6 +34,17 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+// Mapping of room numbers to Square catalogObjectIds
+const ROOM_CATALOG_MAP = {
+  // Kings
+  '102': 'T7YM7YWFQNVE5UC6UQB6Q2WR',
+  '109': 'QFTVFSDI45AETRSG3BR3Z4TL',
+  // Queens
+  '106': 'IMTX5BV4GFESVG4HYNPCMXYC',
+  '108': 'T2NB4OBAVUTQRLBSLKUXDH5F',
+  '113': 'OC3VQPJVFYHA4AR7AZAE4HQG'
+};
+
 app.post('/api/create-payment', async (req, res) => {
   const { amount, email, guestName, roomType, checkInDate, checkOutDate, room_id, adults, children, special_requests } = req.body;
 
@@ -50,18 +61,20 @@ app.post('/api/create-payment', async (req, res) => {
       room_type: roomType
     };
 
+    const catalogObjectId = ROOM_CATALOG_MAP[room_id];
+    if (!catalogObjectId) {
+      return res.status(400).json({ error: 'Invalid room selected.' });
+    }
+
     const response = await client.checkoutApi.createPaymentLink({
       idempotencyKey: crypto.randomUUID(),
       order: {
         locationId: process.env.SQUARE_LOCATION_ID,
         lineItems: [
           {
-            catalogObjectId: 'UGBZ2PNOMAZNJM24TZN7VDLE', // SUITE item with both taxes enabled
-            quantity: '1',
-            basePriceMoney: {
-              amount: Math.round(amount * 100),
-              currency: 'USD',
-            }
+            catalogObjectId,
+            quantity: '1'
+            // No basePriceMoney; price comes from catalog
           }
         ]
       },
