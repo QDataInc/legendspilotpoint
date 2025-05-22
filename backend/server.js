@@ -52,13 +52,26 @@ app.post('/api/create-payment', async (req, res) => {
 
     const response = await client.checkoutApi.createPaymentLink({
       idempotencyKey: crypto.randomUUID(),
-      quickPay: {
-        name: 'Room Booking Payment',
-        priceMoney: {
-          amount: Math.round(amount * 100),
-          currency: 'USD',
-        },
+      order: {
         locationId: process.env.SQUARE_LOCATION_ID,
+        lineItems: [
+          {
+            name: 'Room Booking',
+            quantity: '1',
+            basePriceMoney: {
+              amount: Math.round(amount * 100),
+              currency: 'USD',
+            },
+            taxes: [
+              {
+                uid: 'hotel-tax-13',
+                name: 'Hotel Tax',
+                percentage: '13',
+                scope: 'LINE_ITEM'
+              }
+            ]
+          }
+        ]
       },
       checkoutOptions: {
         redirectUrl: `${process.env.NEXT_PUBLIC_APP_URL}/confirmation`,
