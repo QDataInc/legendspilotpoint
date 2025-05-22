@@ -56,13 +56,12 @@ app.post('/api/create-payment', async (req, res) => {
         locationId: process.env.SQUARE_LOCATION_ID,
         lineItems: [
           {
-            name: 'Room Booking',
+            catalogObjectId: 'UGBZ2PNOMAZNJM24TZN7VDLE', // SUITE item with both taxes enabled
             quantity: '1',
             basePriceMoney: {
               amount: Math.round(amount * 100),
               currency: 'USD',
-            },
-            taxes: ['VEVBQB7THBK4KZN76CE5XFA5', 'NOGOG4Z3G2PIFP3ZPH27A2HI'] // Occupancy Tax and State Tax
+            }
           }
         ]
       },
