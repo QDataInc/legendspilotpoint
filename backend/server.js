@@ -75,6 +75,8 @@ app.post('/api/create-payment', async (req, res) => {
       room_type: roomType
     };
 
+    // Debug log for room_id and rateType
+    console.log('room_id:', room_id, 'rateType:', rateType);
     // Use rateType from request (should be 'regular' or 'weekend')
     const variationId = ROOM_VARIATION_MAP[room_id]?.[rateType];
     if (!variationId) {
