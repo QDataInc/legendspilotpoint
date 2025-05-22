@@ -182,7 +182,7 @@ const Navbar = () => {
         transition={{ type: "tween", duration: 0.3 }}
         className="fixed top-0 left-0 right-0 z-50 bg-black/60"
       >
-        <div className="container mx-auto flex justify-between items-center px-6 py-4">
+        <div className="container mx-auto flex justify-between items-center px-6 py-2">
           <motion.button 
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -190,7 +190,7 @@ const Navbar = () => {
           >
             <img
               src="/img-vid/logo.png"
-              className="h-28 w-auto object-contain"
+              className="h-16 w-auto object-contain"
               alt="logo"
             />
           </motion.button>
