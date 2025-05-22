@@ -35,19 +35,32 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// Mapping of room numbers to Square catalogObjectIds
-const ROOM_CATALOG_MAP = {
-  // Kings
-  '102': 'T7YM7YWFQNVE5UC6UQB6Q2WR',
-  '109': 'QFTVFSDI45AETRSG3BR3Z4TL',
-  // Queens
-  '106': 'IMTX5BV4GFESVG4HYNPCMXYC',
-  '108': 'T2NB4OBAVUTQRLBSLKUXDH5F',
-  '113': 'OC3VQPJVFYHA4AR7AZAE4HQG'
+// Mapping of room numbers to variation IDs for regular and weekend rates
+const ROOM_VARIATION_MAP = {
+  '102': {
+    regular: 'OWUPYXWBP25ZPBXYIXOGIAVH',
+    weekend: 'YDS4ZJLVB2AKGBRE3H4QMLQW'
+  },
+  '109': {
+    regular: 'ABW2CMSCMUCCNIJQBCMUWI3E',
+    weekend: 'PAA4MXTABGT44BSKTPC76TSK'
+  },
+  '106': {
+    regular: '3YBKN7AUQYDYBVLPGUPN5F3Q',
+    weekend: 'YCGJGEHXRTRY477624AXNUNS'
+  },
+  '108': {
+    regular: 'QPZUUFYXJLDFE2TNJKVQML7S',
+    weekend: 'D52V6ZL5M33J5JCOF7STEA24'
+  },
+  '113': {
+    regular: 'W4LUBHNAR5YD2KYL33LIOSDQ',
+    weekend: 'QYWXQVU335GM52QESP7AEBNH'
+  }
 };
 
 app.post('/api/create-payment', async (req, res) => {
-  const { amount, email, guestName, roomType, checkInDate, checkOutDate, room_id, adults, children, special_requests } = req.body;
+  const { amount, email, guestName, roomType, checkInDate, checkOutDate, room_id, adults, children, special_requests, rateType } = req.body;
 
   try {
     const bookingDetails = {
@@ -62,9 +75,10 @@ app.post('/api/create-payment', async (req, res) => {
       room_type: roomType
     };
 
-    const catalogObjectId = ROOM_CATALOG_MAP[room_id];
-    if (!catalogObjectId) {
-      return res.status(400).json({ error: 'Invalid room selected.' });
+    // Use rateType from request (should be 'regular' or 'weekend')
+    const variationId = ROOM_VARIATION_MAP[room_id]?.[rateType];
+    if (!variationId) {
+      return res.status(400).json({ error: 'Invalid room or rate type selected.' });
     }
 
     const response = await client.checkoutApi.createPaymentLink({
@@ -73,9 +87,8 @@ app.post('/api/create-payment', async (req, res) => {
         locationId: process.env.SQUARE_LOCATION_ID,
         lineItems: [
           {
-            catalogObjectId,
+            catalogObjectId: variationId,
             quantity: '1'
-            // No basePriceMoney; price comes from catalog
           }
         ]
       },
