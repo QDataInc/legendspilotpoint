@@ -290,11 +290,7 @@ const RoomDetails = () => {
                   <li className="text-[#F56A00] font-bold text-2xl mt-4">
                     {(checkInDate && checkOutDate) ? `Total for stay: $${getTotalPrice(room.room_type, checkInDate, checkOutDate)}+tax` : 'Select dates'}
                   </li>
-                  <div className="flex items-center mt-2 text-green-700 font-medium text-base">
-                    <svg className="mr-1" width="20" height="20" viewBox="0 0 20 20" fill="none">
-                      <path d="M7.629 14.29a1 1 0 0 1-1.415 0l-3.5-3.5a1 1 0 1 1 1.415-1.415l2.793 2.793 6.793-6.793a1 1 0 1 1 1.415 1.415l-7.5 7.5z" fill="#388e3c"/>
-                    </svg>
-                  </div>
+                 
                 </ul>
               </div>
 
