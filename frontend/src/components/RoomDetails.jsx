@@ -294,7 +294,6 @@ const RoomDetails = () => {
                     <svg className="mr-1" width="20" height="20" viewBox="0 0 20 20" fill="none">
                       <path d="M7.629 14.29a1 1 0 0 1-1.415 0l-3.5-3.5a1 1 0 1 1 1.415-1.415l2.793 2.793 6.793-6.793a1 1 0 1 1 1.415 1.415l-7.5 7.5z" fill="#388e3c"/>
                     </svg>
-                    Total includes taxes and fees
                   </div>
                 </ul>
               </div>
