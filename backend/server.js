@@ -263,6 +263,21 @@ cron.schedule('0 2 * * *', async () => {
   }
 });
 
+// Endpoint to fetch all Square tax catalog objects (for admin use)
+app.get('/api/square-taxes', async (req, res) => {
+  try {
+    const { result } = await client.catalogApi.listCatalog(undefined, 'TAX');
+    const taxes = (result.objects || []).map(obj => ({
+      id: obj.id,
+      name: obj.taxData?.name,
+      percentage: obj.taxData?.percentage
+    }));
+    res.json({ taxes });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT} (environment: ${process.env.NODE_ENV || 'unknown'})`);
 });
