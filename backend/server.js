@@ -62,10 +62,7 @@ app.post('/api/create-payment', async (req, res) => {
               amount: Math.round(amount * 100),
               currency: 'USD',
             },
-            appliedTaxes: [
-              { taxUid: 'VEVBQB7THBK4KZN76CE5XFA5' }, // Occupancy Tax
-              { taxUid: 'NOGOG4Z3G2PIFP3ZPH27A2HI' }  // State Tax
-            ]
+            taxes: ['VEVBQB7THBK4KZN76CE5XFA5', 'NOGOG4Z3G2PIFP3ZPH27A2HI'] // Occupancy Tax and State Tax
           }
         ]
       },
