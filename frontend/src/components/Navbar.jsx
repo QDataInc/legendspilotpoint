@@ -180,7 +180,7 @@ const Navbar = () => {
         initial={{ y: 0 }}
         animate={{ y: showHeader ? 0 : "-100%" }}
         transition={{ type: "tween", duration: 0.3 }}
-        className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-black/80"
+        className="fixed top-0 left-0 right-0 z-50 bg-black/60"
       >
         <div className="container mx-auto flex justify-between items-center px-6 py-4">
           <motion.button 
