@@ -2,11 +2,11 @@ import React from 'react';
 
 const Menu = () => {
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-[#FFEDD5] to-[#FDBA74] relative font-['Open_Sans'] pb-12">
+    <div className="min-h-screen w-full bg-gradient-to-br from-[#FFEDD5] to-[#FDBA74] relative font-['Open_Sans'] pb-12 pt-24">
       {/* Pattern overlay */}
       <div className="absolute inset-0 opacity-5 bg-[url('/img-vid/pattern.png')] bg-repeat"></div>
       
-      <div className="relative z-10 max-w-2xl md:max-w-3xl mx-auto px-2 md:px-8 pt-8">
+      <div className="relative z-10 max-w-2xl md:max-w-3xl mx-auto px-2 md:px-8">
         {/* Poster Title */}
         <div className="text-center mb-10">
           <h1 className="text-3xl md:text-5xl font-['Bebas_Neue'] font-extrabold uppercase tracking-widest text-[#7C2D12] drop-shadow-sm">
