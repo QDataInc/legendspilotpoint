@@ -296,6 +296,19 @@ app.get('/api/square-items', async (req, res) => {
   }
 });
 
+// Endpoint to fetch the price of a catalog item variation by ID
+app.get('/api/square-item-price/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { result } = await client.catalogApi.retrieveCatalogObject(id, true);
+    const variation = result.object && result.object.itemVariationData;
+    const price = variation && variation.priceMoney ? variation.priceMoney.amount : null;
+    res.json({ price });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT} (environment: ${process.env.NODE_ENV || 'unknown'})`);
 });
