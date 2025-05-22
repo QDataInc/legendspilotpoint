@@ -62,15 +62,10 @@ app.post('/api/create-payment', async (req, res) => {
               amount: Math.round(amount * 100),
               currency: 'USD',
             },
-            taxIds: ['VEVBQB7THBK4KZN76CE5XFA5', 'NOGOG4Z3G2PIFP3ZPH27A2HI']
-          }
-        ],
-        taxes: [
-          {
-            uid: 'hotel-tax-13',
-            name: 'Hotel Tax',
-            percentage: '13',
-            scope: 'LINE_ITEM'
+            appliedTaxes: [
+              { taxUid: 'VEVBQB7THBK4KZN76CE5XFA5' }, // Occupancy Tax
+              { taxUid: 'NOGOG4Z3G2PIFP3ZPH27A2HI' }  // State Tax
+            ]
           }
         ]
       },
