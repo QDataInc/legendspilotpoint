@@ -62,7 +62,7 @@ app.post('/api/create-payment', async (req, res) => {
               amount: Math.round(amount * 100),
               currency: 'USD',
             },
-            taxIds: ['hotel-tax-13']
+            taxIds: ['VEVBQB7THBK4KZN76CE5XFA5', 'NOGOG4Z3G2PIFP3ZPH27A2HI']
           }
         ],
         taxes: [
