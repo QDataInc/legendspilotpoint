@@ -1,7 +1,7 @@
 const HomePage = () => {
   return (
     <div className="relative w-full min-h-screen flex flex-col">
-      <div className="relative w-full h-screen">
+      <div className="relative w-full h-screen -mt-[80px]">
         <video className="w-full h-full object-cover" autoPlay loop muted>
           <source src="/img-vid/homePageVid.mp4" type="video/mp4" />
           Your browser does not support the video tag.
@@ -41,13 +41,13 @@ const HomePage = () => {
             }}
           >
             Welcome to the flavor frontier! Here, smoky BBQ meets zesty Tex-Mex
-            for a taste you won’t forget. Sink your teeth into fire-grilled
+            for a taste you won't forget. Sink your teeth into fire-grilled
             brisket quesadillas, tangy chipotle-glazed ribs, or our signature
             smoked carnitas tacos. Pair it with an ice-cold Texas Mule or a
-            spicy mango margarita from our bar, and you’ve got yourself a
+            spicy mango margarita from our bar, and you've got yourself a
             fiesta. Not a meat lover? Our grilled street corn and smoky avocado
             bowls bring the heat for everyone at the table. So grab a seat,
-            round up your crew, and let’s turn up the flavor!
+            round up your crew, and let's turn up the flavor!
           </p>
 
           <a
