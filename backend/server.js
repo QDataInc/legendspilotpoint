@@ -319,6 +319,8 @@ app.get('/api/square-item-variations/:id', async (req, res) => {
           id: v.id,
           name: v.itemVariationData?.name,
           price: v.itemVariationData?.priceMoney?.amount
+            ? v.itemVariationData.priceMoney.amount.toString()
+            : null
         }))
       : [];
     res.json({ variations });
