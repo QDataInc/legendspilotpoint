@@ -135,20 +135,11 @@ const Reservation = () => {
   }, {});
 
   // Price calculation helpers
-  function isWeekend(dateString) {
-    // Parse YYYY-MM-DD as local date
-    const [year, month, day] = dateString.split('-').map(Number);
-    const date = new Date(year, month - 1, day);
-    const dayOfWeek = date.getDay(); // 0 = Sunday, 6 = Saturday
-    return dayOfWeek === 0 || dayOfWeek === 6;
-  }
-
-  function getRoomPrice(roomType, dateString) {
-    const weekend = isWeekend(dateString);
+  function getRoomPrice(roomType) {
     if (roomType.toLowerCase().includes('king')) {
       return 0.01; // Test price for King bed
     } else if (roomType.toLowerCase().includes('queen')) {
-      return weekend ? 135 : 120;
+      return 0.01; // Test price for Queen bed
     }
     return 0;
   }
@@ -354,7 +345,7 @@ const Reservation = () => {
                             )}
                           </div>
                           <p className="text-2xl font-bold text-[#F56A00] mb-2">
-                            ${getRoomPrice(type, searchParams.checkIn || new Date())}/night
+                            ${getRoomPrice(type)}/night
                           </p>
                           <h5 className="text-[#2E2E2E] font-semibold mb-2">Amenities:</h5>
                           <ul className="space-y-1 text-base mb-2">

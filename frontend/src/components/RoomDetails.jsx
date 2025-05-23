@@ -127,8 +127,7 @@ const RoomDetails = () => {
         room_id: roomId,
         adults: bookingInfo.adults,
         children: bookingInfo.children,
-        special_requests: bookingInfo.specialRequests,
-        rateType: isWeekend(bookingInfo.checkInDate) ? 'weekend' : 'regular'
+        special_requests: bookingInfo.specialRequests
       };
 
       // Store booking data in localStorage
@@ -178,19 +177,11 @@ const RoomDetails = () => {
   };
 
   // Price calculation helpers
-  function isWeekend(dateString) {
-    const [year, month, day] = dateString.split('-').map(Number);
-    const date = new Date(year, month - 1, day);
-    const dayOfWeek = date.getDay(); // 0 = Sunday, 6 = Saturday
-    return dayOfWeek === 0 || dayOfWeek === 6;
-  }
-
-  function getRoomPrice(roomType, dateString) {
-    const weekend = isWeekend(dateString);
+  function getRoomPrice(roomType) {
     if (roomType.toLowerCase().includes('king')) {
       return 0.01; // Test price for King bed
     } else if (roomType.toLowerCase().includes('queen')) {
-      return weekend ? 135 : 120;
+      return 0.01; // Test price for Queen bed
     }
     return 0;
   }
@@ -211,10 +202,10 @@ const RoomDetails = () => {
   // Calculate total price for the stay
   function getTotalPrice(roomType, checkIn, checkOut) {
     const nights = getDatesBetween(checkIn, checkOut);
-    return nights.reduce((sum, date) => sum + getRoomPrice(roomType, date.toISOString().slice(0, 10)), 0);
+    return nights.length * getRoomPrice(roomType);
   }
 
-  console.log('Room type:', room.room_type, 'Check-in:', bookingInfo.checkInDate, 'Calculated price:', getRoomPrice(room.room_type, bookingInfo.checkInDate));
+  console.log('Room type:', room.room_type, 'Check-in:', bookingInfo.checkInDate, 'Calculated price:', getRoomPrice(room.room_type));
 
   // Image gallery for King Room
   const kingRoomImages = [
