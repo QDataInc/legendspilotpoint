@@ -35,26 +35,26 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// Mapping of room numbers to variation IDs for regular and weekend rates
+// Mapping of database room ids to variation IDs for regular and weekend rates
 const ROOM_VARIATION_MAP = {
-  '102': {
-    regular: 'OWUPYXWBP25ZPBXYIXOGIAVH',
+  '2': {
+    regular: 'OWUPYXWBP25ZPBXYIXOGIAVH', // K102
     weekend: 'YDS4ZJLVB2AKGBRE3H4QMLQW'
   },
-  '109': {
-    regular: 'ABW2CMSCMUCCNIJQBCMUWI3E',
+  '5': {
+    regular: 'ABW2CMSCMUCCNIJQBCMUWI3E', // Q203 (example, update as needed)
     weekend: 'PAA4MXTABGT44BSKTPC76TSK'
   },
-  '106': {
-    regular: '3YBKN7AUQYDYBVLPGUPN5F3Q',
+  '4': {
+    regular: '3YBKN7AUQYDYBVLPGUPN5F3Q', // Q202 (example, update as needed)
     weekend: 'YCGJGEHXRTRY477624AXNUNS'
   },
-  '108': {
-    regular: 'QPZUUFYXJLDFE2TNJKVQML7S',
+  '7': {
+    regular: 'QPZUUFYXJLDFE2TNJKVQML7S', // (example, update as needed)
     weekend: 'D52V6ZL5M33J5JCOF7STEA24'
   },
-  '113': {
-    regular: 'W4LUBHNAR5YD2KYL33LIOSDQ',
+  '8': {
+    regular: 'W4LUBHNAR5YD2KYL33LIOSDQ', // (example, update as needed)
     weekend: 'QYWXQVU335GM52QESP7AEBNH'
   }
 };
@@ -77,7 +77,7 @@ app.post('/api/create-payment', async (req, res) => {
 
     // Debug log for room_id and rateType
     console.log('room_id:', room_id, 'rateType:', rateType);
-    // Use rateType from request (should be 'regular' or 'weekend')
+    // Use room_id directly as the key
     const variationId = ROOM_VARIATION_MAP[room_id]?.[rateType];
     if (!variationId) {
       return res.status(400).json({ error: 'Invalid room or rate type selected.' });
