@@ -53,7 +53,7 @@ const ROOM_VARIATION_MAP = {
     regular: 'QPZUUFYXJLDFE2TNJKVQML7S', // Q202 108
     weekend: 'D52V6ZL5M33J5JCOF7STEA24'
   },
-  '5': {
+  '6': {
     regular: 'W4LUBHNAR5YD2KYL33LIOSDQ', // Q203 113
     weekend: 'QYWXQVU335GM52QESP7AEBNH'
   }
