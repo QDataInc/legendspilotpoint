@@ -127,7 +127,8 @@ const RoomDetails = () => {
         room_id: roomId,
         adults: bookingInfo.adults,
         children: bookingInfo.children,
-        special_requests: bookingInfo.specialRequests
+        special_requests: bookingInfo.specialRequests,
+        rateType: isWeekend(bookingInfo.checkInDate) ? 'weekend' : 'regular'
       };
 
       // Store booking data in localStorage
@@ -178,8 +179,6 @@ const RoomDetails = () => {
 
   // Price calculation helpers
   function isWeekend(dateString) {
-    if (!dateString) return false;
-    // Parse YYYY-MM-DD as local date (not UTC)
     const [year, month, day] = dateString.split('-').map(Number);
     const date = new Date(year, month - 1, day);
     const dayOfWeek = date.getDay(); // 0 = Sunday, 6 = Saturday
