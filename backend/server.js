@@ -37,24 +37,24 @@ const transporter = nodemailer.createTransport({
 
 // Mapping of database room ids to variation IDs for regular and weekend rates
 const ROOM_VARIATION_MAP = {
-  '2': {
-    regular: 'OWUPYXWBP25ZPBXYIXOGIAVH', // K102
+  '1': {
+    regular: 'OWUPYXWBP25ZPBXYIXOGIAVH', // K101 102
     weekend: 'YDS4ZJLVB2AKGBRE3H4QMLQW'
   },
-  '5': {
-    regular: 'ABW2CMSCMUCCNIJQBCMUWI3E', // Q203 (example, update as needed)
+  '2': {
+    regular: 'ABW2CMSCMUCCNIJQBCMUWI3E', // K102 109
     weekend: 'PAA4MXTABGT44BSKTPC76TSK'
   },
   '4': {
-    regular: '3YBKN7AUQYDYBVLPGUPN5F3Q', // Q202 (example, update as needed)
+    regular: '3YBKN7AUQYDYBVLPGUPN5F3Q', // Q201 106
     weekend: 'YCGJGEHXRTRY477624AXNUNS'
   },
-  '7': {
-    regular: 'QPZUUFYXJLDFE2TNJKVQML7S', // (example, update as needed)
+  '5': {
+    regular: 'QPZUUFYXJLDFE2TNJKVQML7S', // Q202 108
     weekend: 'D52V6ZL5M33J5JCOF7STEA24'
   },
-  '8': {
-    regular: 'W4LUBHNAR5YD2KYL33LIOSDQ', // (example, update as needed)
+  '5': {
+    regular: 'W4LUBHNAR5YD2KYL33LIOSDQ', // Q203 113
     weekend: 'QYWXQVU335GM52QESP7AEBNH'
   }
 };
