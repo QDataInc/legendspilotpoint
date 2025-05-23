@@ -35,33 +35,25 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// Mapping of database room ids to variation IDs for regular and weekend rates
-const ROOM_VARIATION_MAP = {
-  '1': {
-    regular: 'OWUPYXWBP25ZPBXYIXOGIAVH', // K101 102
-    weekend: 'YDS4ZJLVB2AKGBRE3H4QMLQW'
-  },
-  '2': {
-    regular: 'ABW2CMSCMUCCNIJQBCMUWI3E', // K102 109
-    weekend: 'PAA4MXTABGT44BSKTPC76TSK'
-  },
-  '4': {
-    regular: '3YBKN7AUQYDYBVLPGUPN5F3Q', // Q201 106
-    weekend: 'YCGJGEHXRTRY477624AXNUNS'
-  },
-  '5': {
-    regular: 'QPZUUFYXJLDFE2TNJKVQML7S', // Q202 108
-    weekend: 'D52V6ZL5M33J5JCOF7STEA24'
-  },
-  '6': {
-    regular: 'W4LUBHNAR5YD2KYL33LIOSDQ', // Q203 113
-    weekend: 'QYWXQVU335GM52QESP7AEBNH'
-  }
+// Mapping of room numbers to their catalog IDs
+const ROOM_CATALOG_IDS = {
+  '102': 'T7YM7YWFQNVE5UC6UQB6Q2WR',
+  '109': 'QFTVFSDI45AETRSG3BR3Z4TL',
+  '106': 'IMTX5BV4GFESVG4HYNPCMXYC',
+  '108': 'T2NB4OBAVUTQRLBSLKUXDH5F',
+  '113': 'OC3VQPJVFYHA4AR7AZAE4HQG'
 };
 
+// Helper function to calculate number of nights between two dates
+function calculateNights(checkIn, checkOut) {
+  const start = new Date(checkIn);
+  const end = new Date(checkOut);
+  const diffTime = Math.abs(end - start);
+  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+}
 
 app.post('/api/create-payment', async (req, res) => {
-  const { amount, email, guestName, roomType, checkInDate, checkOutDate, room_id, adults, children, special_requests, rateType } = req.body;
+  const { amount, email, guestName, roomType, checkInDate, checkOutDate, room_id, adults, children, special_requests } = req.body;
 
   try {
     const bookingDetails = {
@@ -76,13 +68,14 @@ app.post('/api/create-payment', async (req, res) => {
       room_type: roomType
     };
 
-    // Debug log for room_id and rateType
-    console.log('room_id:', room_id, 'rateType:', rateType);
-    // Use room_id directly as the key
-    const variationId = ROOM_VARIATION_MAP[room_id]?.[rateType];
-    if (!variationId) {
-      return res.status(400).json({ error: 'Invalid room or rate type selected.' });
+    // Get the catalog ID for the room
+    const catalogId = ROOM_CATALOG_IDS[room_id];
+    if (!catalogId) {
+      return res.status(400).json({ error: 'Invalid room selected.' });
     }
+
+    // Calculate number of nights
+    const numberOfNights = calculateNights(checkInDate, checkOutDate);
 
     const response = await client.checkoutApi.createPaymentLink({
       idempotencyKey: crypto.randomUUID(),
@@ -90,8 +83,8 @@ app.post('/api/create-payment', async (req, res) => {
         locationId: process.env.SQUARE_LOCATION_ID,
         lineItems: [
           {
-            catalogObjectId: variationId,
-            quantity: '1'
+            catalogObjectId: catalogId,
+            quantity: numberOfNights.toString()
           }
         ]
       },
@@ -105,6 +98,7 @@ app.post('/api/create-payment', async (req, res) => {
 
     res.json({ url: response.result.paymentLink.url });
   } catch (error) {
+    console.error('Error creating payment link:', error);
     res.status(500).json({ error: 'Failed to generate payment link' });
   }
 });
