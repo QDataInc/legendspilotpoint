@@ -59,6 +59,7 @@ const ROOM_VARIATION_MAP = {
   }
 };
 
+
 app.post('/api/create-payment', async (req, res) => {
   const { amount, email, guestName, roomType, checkInDate, checkOutDate, room_id, adults, children, special_requests, rateType } = req.body;
 
