@@ -65,7 +65,7 @@ const Navbar = () => {
           { path: "/PrivateDining", label: "PrivateDining" },
           { path: "/Events", label: "Events" },
           { path: "/AboutUs", label: "AboutUs" },
-          { path: "/Reservation", label: "Hotel Reservation" }
+          { path: "/Reservation", label: "Stay with Us" }
         ].map((item) => (
           <motion.button
             key={item.path}
