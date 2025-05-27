@@ -224,6 +224,7 @@ app.post('/api/confirm-booking', async (req, res) => {
         subject: 'Booking Confirmation - Legends Pilot Point',
         html: `
           <p>Thank you for your booking, <b>${bookingDetails.guestName}</b>!</p>
+          <p>Room Type: <b>${bookingDetails.roomType}</b></p>
           <p>Your check-in date: <b>${bookingDetails.checkInDate}</b></p>
           <p>Your check-out date: <b>${bookingDetails.checkOutDate}</b></p>
           <p>Your room has been reserved and we look forward to hosting you.</p>
