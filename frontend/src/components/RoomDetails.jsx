@@ -177,11 +177,19 @@ const RoomDetails = () => {
   };
 
   // Price calculation helpers
-  function getRoomPrice(roomType) {
+  function isWeekend(dateString) {
+    const [year, month, day] = dateString.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
+    const dayOfWeek = date.getDay(); // 0 = Sunday, 6 = Saturday
+    return dayOfWeek === 0 || dayOfWeek === 6;
+  }
+
+  function getRoomPrice(roomType, dateString) {
+    const weekend = isWeekend(dateString);
     if (roomType.toLowerCase().includes('king')) {
-      return 0.01; // Test price for King bed
+      return weekend ? 125 : 110;
     } else if (roomType.toLowerCase().includes('queen')) {
-      return 0.01; // Test price for Queen bed
+      return weekend ? 135 : 120;
     }
     return 0;
   }
@@ -202,10 +210,10 @@ const RoomDetails = () => {
   // Calculate total price for the stay
   function getTotalPrice(roomType, checkIn, checkOut) {
     const nights = getDatesBetween(checkIn, checkOut);
-    return nights.length * getRoomPrice(roomType);
+    return nights.reduce((sum, date) => sum + getRoomPrice(roomType, date.toISOString().slice(0, 10)), 0);
   }
 
-  console.log('Room type:', room.room_type, 'Check-in:', bookingInfo.checkInDate, 'Calculated price:', getRoomPrice(room.room_type));
+  console.log('Room type:', room.room_type, 'Check-in:', bookingInfo.checkInDate, 'Calculated price:', getRoomPrice(room.room_type, bookingInfo.checkInDate));
 
   // Image gallery for King Room
   const kingRoomImages = [
@@ -278,9 +286,11 @@ const RoomDetails = () => {
                   </li>
                   {/* Price for selected night */}
                   <li className="text-[#F56A00] font-bold text-2xl mt-4">
+                    {room.room_type.toLowerCase().includes('king') ? '$110–$125/night' : '$120–$135/night'}
+                  </li>
+                  <li className="text-[#F56A00] font-bold text-2xl mt-4">
                     {(checkInDate && checkOutDate) ? `Total for stay: $${getTotalPrice(room.room_type, checkInDate, checkOutDate)}+tax` : 'Select dates'}
                   </li>
-                 
                 </ul>
               </div>
 

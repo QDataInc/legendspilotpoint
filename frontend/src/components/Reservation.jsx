@@ -135,13 +135,40 @@ const Reservation = () => {
   }, {});
 
   // Price calculation helpers
-  function getRoomPrice(roomType) {
+  function isWeekend(dateString) {
+    const [year, month, day] = dateString.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
+    const dayOfWeek = date.getDay(); // 0 = Sunday, 6 = Saturday
+    return dayOfWeek === 0 || dayOfWeek === 6;
+  }
+
+  function getRoomPrice(roomType, dateString) {
+    const weekend = isWeekend(dateString);
     if (roomType.toLowerCase().includes('king')) {
-      return 0.01; // Test price for King bed
+      return weekend ? 125 : 110;
     } else if (roomType.toLowerCase().includes('queen')) {
-      return 0.01; // Test price for Queen bed
+      return weekend ? 135 : 120;
     }
     return 0;
+  }
+
+  // Helper to get all dates between two dates (exclusive of end date)
+  function getDatesBetween(start, end) {
+    if (!start || !end) return [];
+    const dates = [];
+    let current = new Date(start);
+    const endDate = new Date(end);
+    while (current < endDate) {
+      dates.push(new Date(current));
+      current.setDate(current.getDate() + 1);
+    }
+    return dates;
+  }
+
+  // Calculate total price for the stay
+  function getTotalPrice(roomType, checkIn, checkOut) {
+    const nights = getDatesBetween(checkIn, checkOut);
+    return nights.reduce((sum, date) => sum + getRoomPrice(roomType, date.toISOString().slice(0, 10)), 0);
   }
 
   return (
@@ -345,7 +372,7 @@ const Reservation = () => {
                             )}
                           </div>
                           <p className="text-2xl font-bold text-[#F56A00] mb-2">
-                            ${getRoomPrice(type)}/night
+                            {type === 'king' ? '$110–$125/night' : '$120–$135/night'}
                           </p>
                           <h5 className="text-[#2E2E2E] font-semibold mb-2">Amenities:</h5>
                           <ul className="space-y-1 text-base mb-2">
