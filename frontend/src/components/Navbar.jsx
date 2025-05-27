@@ -16,22 +16,11 @@ const Navbar = () => {
   const lastScrollY = useRef(window.scrollY);
 
   useEffect(() => {
-    let ticking = false;
     const handleScroll = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          const currentScrollY = window.scrollY;
-          if (currentScrollY <= 0) {
-            setShowHeader(true);
-          } else if (currentScrollY > lastScrollY.current) {
-            setShowHeader(false); // scrolling down
-          } else if (currentScrollY < lastScrollY.current) {
-            setShowHeader(true); // scrolling up
-          }
-          lastScrollY.current = currentScrollY;
-          ticking = false;
-        });
-        ticking = true;
+      if (window.scrollY === 0) {
+        setShowHeader(true);
+      } else {
+        setShowHeader(false);
       }
     };
     window.addEventListener("scroll", handleScroll);
