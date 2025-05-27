@@ -177,7 +177,10 @@ const Navbar = () => {
 
   return (
     <div className={isAdminPage ? 'relative z-50' : ''}>
-      <nav
+      <motion.nav
+        initial={{ y: 0 }}
+        animate={{ y: showHeader ? 0 : "-100%" }}
+        transition={{ type: "tween", duration: 0.3 }}
         className="w-full z-50 bg-[#2E2E2E] fixed top-0 left-0 right-0"
       >
         <div className="container mx-auto flex justify-between items-center px-6 py-2">
@@ -212,7 +215,7 @@ const Navbar = () => {
             </button>
           )}
         </div>
-      </nav>
+      </motion.nav>
       <AnimatePresence>
         {menuOpen && !isAdminPage && !isRoomDetailsPage && (
           <motion.aside
