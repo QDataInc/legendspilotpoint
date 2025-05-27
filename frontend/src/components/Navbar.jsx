@@ -41,7 +41,7 @@ const Navbar = () => {
             onClick={() => handleNavigation("/Reservation")}
             className="text-white hover:text-[#F56A00] px-3 py-2 text-sm font-medium relative group"
           >
-            Hotel Reservation
+            Stay with Us
             <span className="absolute bottom-0 left-0 w-full h-0.5 bg-[#F56A00] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
           </motion.button>
           <motion.button
@@ -57,7 +57,7 @@ const Navbar = () => {
       );
     }
 
-    
+
     return (
       <div className="hidden sm:flex sm:space-x-8">
         {[
@@ -103,7 +103,7 @@ const Navbar = () => {
               onClick={() => handleNavigation("/Reservation")}
               className="text-white hover:text-[#F56A00] block px-3 py-2 text-base font-medium w-full text-left"
             >
-              Hotel Reservation
+              Stay with Us
             </motion.button>
             <motion.button
               whileHover={{ scale: 1.02 }}
@@ -132,7 +132,7 @@ const Navbar = () => {
             { path: "/PrivateDining", label: "PrivateDining" },
             { path: "/Events", label: "Events" },
             { path: "/AboutUs", label: "AboutUs" },
-            { path: "/Reservation", label: "Hotel Reservation" },
+            { path: "/Reservation", label: "Stay with Us" },
             { path: "/admin", label: "Admin" }
           ].map((item) => (
             <motion.button
@@ -153,7 +153,7 @@ const Navbar = () => {
   return (
     <div className={isAdminPage ? 'relative z-50' : ''}>
       <nav
-        className="w-full z-50 bg-[#2E2E2E] fixed top-0 left-0 right-0"
+        className="w-full bg-[#2E2E2E] z-50"
       >
         <div className="container mx-auto flex justify-between items-center px-6 py-2">
           <button 
@@ -214,7 +214,7 @@ const Navbar = () => {
                 { path: "/PrivateDining", label: "Private Dining" },
                 { path: "/Events", label: "Events" },
                 { path: "/AboutUs", label: "About Us" },
-                { path: "/Reservation", label: "Hotel Reservation" },
+                { path: "/Reservation", label: "Stay with Us" },
                 { path: "/admin", label: "Admin" }
               ].map((item) => (
                 <motion.button
