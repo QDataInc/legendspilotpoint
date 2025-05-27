@@ -248,7 +248,7 @@ app.get('/api/available-rooms', async (req, res) => {
       .select('room_id')
       .lt('check_in_date', check_out)
       .gt('check_out_date', check_in)
-      .eq('status', 'confirmed');
+      .in('status', ['confirmed', 'pending']);
 
     if (bookingsError) throw bookingsError;
 
