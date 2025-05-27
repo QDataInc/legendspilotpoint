@@ -37,8 +37,8 @@ const transporter = nodemailer.createTransport({
 
 // Step 1: Map Supabase room_number to Square key
 const ROOM_NUMBER_TO_SQUARE_KEY = {
-  'K101': '102',
-  'K102': '109',
+  'K102': '102',
+  'K101': '109',
   'Q201': '106',
   'Q202': '108',
   'Q203': '113'
@@ -53,13 +53,13 @@ const SQUARE_KEY_TO_CATALOG_ID = {
   '113': 'OC3VQPJVFYHA4AR7AZAE4HQG'
 };
 
-// Step 3: Map Square key to variation IDs (with correct prices)
+// Step 3: Map Square key to variation IDs
 const SQUARE_KEY_TO_VARIATION_ID = {
-  '102': { regular: 'OWUPYXWBP25ZPBXYIXOGIAVH', weekend: 'YDS4ZJLVB2AKGBRE3H4QMLQW' }, // K101 $110/$125
-  '109': { regular: 'ABW2CMSCMUCCNIJQBCMUWI3E', weekend: 'PAA4MXTABGT44BSKTPC76TSK' }, // K102 $110/$125
-  '106': { regular: '3YBKN7AUQYDYBVLPGUPN5F3Q', weekend: 'YCGJGEHXRTRY477624AXNUNS' }, // Q201 $120/$135
-  '108': { regular: 'QPZUUFYXJLDFE2TNJKVQML7S', weekend: 'D52V6ZL5M33J5JCOF7STEA24' }, // Q202 $120/$135
-  '113': { regular: 'W4LUBHNAR5YD2KYL33LIOSDQ', weekend: 'QYWXQVU335GM52QESP7AEBNH' }  // Q203 $120/$135
+  '102': { regular: 'T7YM7YWFQNVE5UC6UQB6Q2WR', weekend: 'T7YM7YWFQNVE5UC6UQB6Q2WR' },
+  '109': { regular: 'QFTVFSDI45AETRSG3BR3Z4TL', weekend: 'QFTVFSDI45AETRSG3BR3Z4TL' },
+  '106': { regular: 'IMTX5BV4GFESVG4HYNPCMXYC', weekend: 'IMTX5BV4GFESVG4HYNPCMXYC' },
+  '108': { regular: 'T2NB4OBAVUTQRLBSLKUXDH5F', weekend: 'T2NB4OBAVUTQRLBSLKUXDH5F' },
+  '113': { regular: 'OC3VQPJVFYHA4AR7AZAE4HQG', weekend: 'OC3VQPJVFYHA4AR7AZAE4HQG' }
 };
 
 // Helper function to calculate number of nights between two dates
