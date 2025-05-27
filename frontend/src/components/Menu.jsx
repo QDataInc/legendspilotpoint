@@ -2,9 +2,9 @@ import React from 'react';
 
 const Menu = () => {
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-[#FFEDD5] to-[#FDBA74] pt-0">
+    <div className="relative min-h-screen w-full bg-gradient-to-br from-[#FFEDD5] to-[#FDBA74] pt-0">
       {/* Pattern overlay */}
-      <div className="absolute inset-0 opacity-5 bg-[url('/img-vid/pattern.png')] bg-repeat"></div>
+      <div className="absolute inset-0 opacity-5 bg-[url('/img-vid/pattern.png')] bg-repeat pointer-events-none"></div>
       
       <div className="relative z-10 max-w-2xl md:max-w-3xl mx-auto px-2 md:px-8">
         {/* Poster Title */}
