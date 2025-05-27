@@ -35,8 +35,17 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// Mapping of room numbers to their catalog IDs
-const ROOM_CATALOG_IDS = {
+// Step 1: Map Supabase room_number to Square key
+const ROOM_NUMBER_TO_SQUARE_KEY = {
+  'K101': '102',
+  'K102': '109',
+  'Q201': '106',
+  'Q202': '108',
+  'Q203': '113'
+};
+
+// Step 2: Map Square key to catalog ID
+const SQUARE_KEY_TO_CATALOG_ID = {
   '102': 'T7YM7YWFQNVE5UC6UQB6Q2WR',
   '109': 'QFTVFSDI45AETRSG3BR3Z4TL',
   '106': 'IMTX5BV4GFESVG4HYNPCMXYC',
@@ -53,11 +62,11 @@ function calculateNights(checkIn, checkOut) {
 }
 
 app.post('/api/create-payment', async (req, res) => {
-  const { amount, email, guestName, roomType, checkInDate, checkOutDate, room_id, adults, children, special_requests } = req.body;
+  const { amount, email, guestName, roomType, checkInDate, checkOutDate, room_number, adults, children, special_requests } = req.body;
 
   try {
     const bookingDetails = {
-      room_id,
+      room_number,
       guest_name: guestName,
       email,
       check_in_date: checkInDate,
@@ -68,8 +77,10 @@ app.post('/api/create-payment', async (req, res) => {
       room_type: roomType
     };
 
-    // Get the catalog ID for the room
-    const catalogId = ROOM_CATALOG_IDS[room_id];
+    // Step 1: Map room_number to Square key
+    const squareKey = ROOM_NUMBER_TO_SQUARE_KEY[room_number];
+    // Step 2: Map Square key to catalog ID
+    const catalogId = SQUARE_KEY_TO_CATALOG_ID[squareKey];
     if (!catalogId) {
       return res.status(400).json({ error: 'Invalid room selected.' });
     }
