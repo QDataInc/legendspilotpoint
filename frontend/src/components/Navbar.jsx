@@ -5,27 +5,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { HiOutlineMenu, HiOutlineX } from 'react-icons/hi';
 
 const Navbar = () => {
-  const [scrolling, setScrolling] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const isReservationPage = location.pathname === '/Reservation';
   const isAdminPage = location.pathname === '/admin';
   const isRoomDetailsPage = location.pathname.startsWith('/room-details/');
-  const [showHeader, setShowHeader] = useState(true);
-  const lastScrollY = useRef(window.scrollY);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY === 0) {
-        setShowHeader(true);
-      } else {
-        setShowHeader(false);
-      }
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   const handleSignOut = async () => {
     try {
@@ -166,10 +151,7 @@ const Navbar = () => {
 
   return (
     <div className={isAdminPage ? 'relative z-50' : ''}>
-      <motion.nav
-        initial={{ y: 0 }}
-        animate={{ y: showHeader ? 0 : "-100%" }}
-        transition={{ type: "tween", duration: 0.3 }}
+      <nav
         className="w-full z-50 bg-[#2E2E2E] fixed top-0 left-0 right-0"
       >
         <div className="container mx-auto flex justify-between items-center px-6 py-2">
@@ -204,7 +186,7 @@ const Navbar = () => {
             </button>
           )}
         </div>
-      </motion.nav>
+      </nav>
       <AnimatePresence>
         {menuOpen && !isAdminPage && !isRoomDetailsPage && (
           <motion.aside
