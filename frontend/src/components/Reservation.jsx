@@ -372,7 +372,9 @@ const Reservation = () => {
                             )}
                           </div>
                           <p className="text-2xl font-bold text-[#F56A00] mb-2">
-                            {type === 'king' ? '$110–$125/night' : '$120–$135/night'}
+                            {(searchParams.checkIn)
+                              ? `$${getRoomPrice(type, searchParams.checkIn)}/night`
+                              : (type === 'king' ? '$110–$125/night' : '$120–$135/night')}
                           </p>
                           <h5 className="text-[#2E2E2E] font-semibold mb-2">Amenities:</h5>
                           <ul className="space-y-1 text-base mb-2">
