@@ -153,7 +153,7 @@ function App() {
           </div>
         )}
         <Navbar className="flex flex-col min-h-screen"></Navbar>
-        <div className="flex flex-col min-h-screen pt-20">
+        <div className="flex flex-col min-h-screen pt-16">
           <ScrollToTop />
           <main className="flex-grow">
             <Routes>
