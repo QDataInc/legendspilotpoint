@@ -117,7 +117,7 @@ function App() {
                 marginBottom: "0.7rem",
                 textShadow: "2px 3px 0 #8B2500, 0 2px 12px #000"
               }}>
-                Restaurant Opening This Fall!
+                Legends Bar & Grill Opening This Fall!
               </div>
               {/* Subheading */}
               <div style={{
@@ -127,7 +127,8 @@ function App() {
                 marginBottom: "1.2rem",
                 textShadow: "0 1px 6px #2d1b0e"
               }}>
-                Legends Bar & Grill is coming soon. Stay tuned for grand opening details!
+                Four HorseMen Hotel is now Legends Bar & Grill. Book your stay with us.<br />
+                Stay tuned for grand opening details!
               </div>
               {/* Decorative Border/Flourish */}
               <div style={{
