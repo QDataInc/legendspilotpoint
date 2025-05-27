@@ -95,18 +95,7 @@ const AboutUs = () => {
               of Tex-Mex to life.
             </p>
           </div>
-          <div className="text-center">
-            <img
-              src="img-vid/family.jpg"
-              alt="Family-Owned"
-              className="w-full h-52 object-cover rounded-lg mb-4"
-            />
-            <h3 className="text-xl font-semibold">Family-Owned</h3>
-            <p className="mt-2 text-gray-700">
-              Our family is at the heart of everything we do, and we treat every
-              guest like one of our own.
-            </p>
-          </div>
+        
         </div>
       </section>
 
