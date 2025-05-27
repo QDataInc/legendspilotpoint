@@ -53,12 +53,39 @@ const SQUARE_KEY_TO_CATALOG_ID = {
   '113': 'OC3VQPJVFYHA4AR7AZAE4HQG'
 };
 
+// Step 3: Map Square key to variation IDs (with correct prices)
+const SQUARE_KEY_TO_VARIATION_ID = {
+  '102': { regular: 'OWUPYXWBP25ZPBXYIXOGIAVH', weekend: 'YDS4ZJLVB2AKGBRE3H4QMLQW' }, // K101 $110/$125
+  '109': { regular: 'ABW2CMSCMUCCNIJQBCMUWI3E', weekend: 'PAA4MXTABGT44BSKTPC76TSK' }, // K102 $110/$125
+  '106': { regular: '3YBKN7AUQYDYBVLPGUPN5F3Q', weekend: 'YCGJGEHXRTRY477624AXNUNS' }, // Q201 $120/$135
+  '108': { regular: 'QPZUUFYXJLDFE2TNJKVQML7S', weekend: 'D52V6ZL5M33J5JCOF7STEA24' }, // Q202 $120/$135
+  '113': { regular: 'W4LUBHNAR5YD2KYL33LIOSDQ', weekend: 'QYWXQVU335GM52QESP7AEBNH' }  // Q203 $120/$135
+};
+
 // Helper function to calculate number of nights between two dates
 function calculateNights(checkIn, checkOut) {
   const start = new Date(checkIn);
   const end = new Date(checkOut);
   const diffTime = Math.abs(end - start);
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+}
+
+// Helper to get all dates between two dates (exclusive of end date)
+function getDatesBetween(start, end) {
+  const dates = [];
+  let current = new Date(start);
+  const endDate = new Date(end);
+  while (current < endDate) {
+    dates.push(new Date(current));
+    current.setDate(current.getDate() + 1);
+  }
+  return dates;
+}
+
+// Helper to check if a date is a weekend
+function isWeekend(date) {
+  const day = date.getDay();
+  return day === 0 || day === 6; // Sunday or Saturday
 }
 
 app.post('/api/create-payment', async (req, res) => {
@@ -79,25 +106,44 @@ app.post('/api/create-payment', async (req, res) => {
 
     // Step 1: Map room_number to Square key
     const squareKey = ROOM_NUMBER_TO_SQUARE_KEY[room_number];
-    // Step 2: Map Square key to catalog ID
-    const catalogId = SQUARE_KEY_TO_CATALOG_ID[squareKey];
-    if (!catalogId) {
+    // Step 2: Get variation IDs
+    const variationIds = SQUARE_KEY_TO_VARIATION_ID[squareKey];
+    if (!variationIds) {
       return res.status(400).json({ error: 'Invalid room selected.' });
     }
 
-    // Calculate number of nights
-    const numberOfNights = calculateNights(checkInDate, checkOutDate);
+    // Count regular and weekend nights
+    const nights = getDatesBetween(checkInDate, checkOutDate);
+    let regularCount = 0, weekendCount = 0;
+    nights.forEach(date => {
+      if (isWeekend(date)) weekendCount++;
+      else regularCount++;
+    });
+
+    // Build line items
+    const lineItems = [];
+    if (regularCount > 0) {
+      lineItems.push({
+        catalogObjectId: variationIds.regular,
+        quantity: regularCount.toString()
+      });
+    }
+    if (weekendCount > 0) {
+      lineItems.push({
+        catalogObjectId: variationIds.weekend,
+        quantity: weekendCount.toString()
+      });
+    }
+
+    if (lineItems.length === 0) {
+      return res.status(400).json({ error: 'No nights selected.' });
+    }
 
     const response = await client.checkoutApi.createPaymentLink({
       idempotencyKey: crypto.randomUUID(),
       order: {
         locationId: process.env.SQUARE_LOCATION_ID,
-        lineItems: [
-          {
-            catalogObjectId: catalogId,
-            quantity: numberOfNights.toString()
-          }
-        ]
+        lineItems
       },
       checkoutOptions: {
         redirectUrl: `${process.env.NEXT_PUBLIC_APP_URL}/confirmation`,
