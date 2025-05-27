@@ -70,7 +70,7 @@ const AboutUs = () => {
         <h2 className="text-4xl font-bold text-center text-[#D97706] mb-10">
           What Sets Us Apart
         </h2>
-        <div className="grid md:grid-cols-3 gap-10">
+        <div className="grid md:grid-cols-2 justify-center gap-10 max-w-4xl mx-auto">
           <div className="text-center">
             <img
               src="img-vid/meat.jpg"
