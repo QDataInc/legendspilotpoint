@@ -2,7 +2,7 @@ import React from 'react';
 
 const Menu = () => {
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-[#FFEDD5] to-[#FDBA74] relative font-['Open_Sans'] pb-12 pt-24">
+    <div className="min-h-screen w-full bg-gradient-to-br from-[#FFEDD5] to-[#FDBA74] pt-0">
       {/* Pattern overlay */}
       <div className="absolute inset-0 opacity-5 bg-[url('/img-vid/pattern.png')] bg-repeat"></div>
       
