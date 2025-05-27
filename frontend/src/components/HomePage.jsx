@@ -1,7 +1,7 @@
 const HomePage = () => {
   return (
     <div className="relative w-full min-h-screen flex flex-col">
-      <div className="relative w-full h-screen -mt-[80px]">
+      <div className="relative w-full h-screen ">
         <video className="w-full h-full object-cover" autoPlay loop muted>
           <source src="/img-vid/homePageVid.mp4" type="video/mp4" />
           Your browser does not support the video tag.
