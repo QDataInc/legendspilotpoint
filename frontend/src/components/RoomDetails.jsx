@@ -124,7 +124,7 @@ const RoomDetails = () => {
         roomType: room.room_type,
         checkInDate: bookingInfo.checkInDate,
         checkOutDate: bookingInfo.checkOutDate,
-        room_number: room.room_number,
+        room_id: room.id,
         adults: bookingInfo.adults,
         children: bookingInfo.children,
         special_requests: bookingInfo.specialRequests
