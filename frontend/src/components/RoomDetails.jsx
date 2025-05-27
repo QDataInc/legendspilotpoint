@@ -299,10 +299,10 @@ const RoomDetails = () => {
               <div className="mb-6">
                 <h2 className="text-xl font-['Cinzel'] font-semibold text-[#8B2500] mb-4">Amenities</h2>
                 <ul className="space-y-2 text-lg">
-                  <li>🚗 Secured on-site parking 📶 Complimentary high-speed Wi-Fi</li>
+                  <li>🚗 Secured on-site parking 📶 Complimentary Wi-Fi</li>
                   <li>🐾 Pet-friendly ($20/day, service animals stay free) 🛒 Convenience store available</li>
                   <li>🧼 Housekeeping upon request ♿ Wheelchair-accessible areas*</li>
-                  <li>🚭 All rooms non-smoking 🏊‍♂️ Outdoor swimming pool</li>
+                  <li>🚭 All rooms non-smoking 🏊‍♂️ Outdoor swimming pool coming soon</li>
                 </ul>
               </div>
             </div>

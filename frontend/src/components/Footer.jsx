@@ -82,7 +82,7 @@ const Footer = () => {
                 className="text-gray-400 flex items-center"
               >
                 <FaPhone className="text-[#F56A00] mr-2" />
-                (555) 123-4567
+                (940) 686-2256
               </motion.p>
             </div>
           </motion.div>

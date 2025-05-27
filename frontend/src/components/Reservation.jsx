@@ -341,13 +341,13 @@ const Reservation = () => {
                   // Amenities with emojis
                   const amenities = [
                     "🚗 Secured on-site parking",
-                    "📶 Complimentary high-speed Wi-Fi",
+                    "📶 Complimentary Wi-Fi",
                     "🐾 Pet-friendly ($20/day, service animals stay free)",
                     "🛒 Convenience store available",
                     "🧼 Housekeeping upon request",
                     "♿ Wheelchair-accessible areas*",
                     "🚭 All rooms non-smoking",
-                    "🏊‍♂️ Outdoor swimming pool"
+                    "🏊‍♂️ Outdoor swimming pool coming soon"
                   ];
                   return (
                     <div
