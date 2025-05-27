@@ -4,7 +4,7 @@ import Footer from "./components/Footer";
 import AboutUs from "./components/AboutUs";
 import Events from "./components/Events";
 import PrivateDining from "./components/PrivateDining";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import Menu from "./components/Menu";
 import Catering from "./components/Catering";
 import Reservation from "./components/Reservation";
@@ -16,6 +16,15 @@ import Login from "./components/Login";
 import { AuthProvider } from "./context/AuthContext";
 import Confirmation from "./components/Confirmation";
 import { useState, useEffect } from "react";
+
+// ScrollToTop component
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [pathname]);
+  return null;
+}
 
 function App() {
   const [showSplash, setShowSplash] = useState(false);
@@ -145,6 +154,7 @@ function App() {
         )}
         <Navbar className="flex flex-col min-h-screen"></Navbar>
         <div className="flex flex-col min-h-screen pt-20">
+          <ScrollToTop />
           <main className="flex-grow">
             <Routes>
               <Route path="/" element={<HomePage></HomePage>}></Route>
