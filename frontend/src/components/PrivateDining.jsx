@@ -76,28 +76,7 @@ const PrivateDining = () => {
             </div>
           </section>
 
-          <section className="text-center mt-16">
-            <h2 className="text-2xl font-bold text-white">
-              What Our Guests Say
-            </h2>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8 text-white">
-              <div className="bg-white/90 p-6 rounded-lg shadow">
-                <p className="text-gray-600 italic">
-                  "Our anniversary dinner was absolutely magical! The private
-                  dining experience was unforgettable."
-                </p>
-                <h4 className="font-semibold text-gray-800 mt-4">- Sarah L.</h4>
-              </div>
-              <div className="bg-white/90 p-6 rounded-lg shadow">
-                <p className="text-gray-600 italic">
-                  "We hosted a corporate meeting here, and the service and food
-                  were top-notch. Highly recommend!"
-                </p>
-                <h4 className="font-semibold text-gray-800 mt-4">- Mark T.</h4>
-              </div>
-            </div>
-          </section>
-
+          
           <section className="text-center mt-16">
             <h2 className="text-2xl font-bold text-white">
               Ready to Book Your Private Dining Experience?
