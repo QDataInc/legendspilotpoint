@@ -143,7 +143,11 @@ app.post('/api/create-payment', async (req, res) => {
       idempotencyKey: crypto.randomUUID(),
       order: {
         locationId: process.env.SQUARE_LOCATION_ID,
-        lineItems
+        lineItems,
+        taxes: [
+          { uid: 'state-tax', catalogObjectId: 'NOGOG4Z3G2PIFP3ZPH27A2HI' }, // State Tax 6%
+          { uid: 'occupancy-tax', catalogObjectId: 'VEVBQB7THBK4KZN76CE5XFA5' } // Occupancy Tax 7%
+        ]
       },
       checkoutOptions: {
         redirectUrl: `${process.env.NEXT_PUBLIC_APP_URL}/confirmation`,
