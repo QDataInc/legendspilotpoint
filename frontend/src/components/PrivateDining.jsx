@@ -91,5 +91,4 @@ const PrivateDining = () => {
     </div>
   );
 };
-
 export default PrivateDining;
