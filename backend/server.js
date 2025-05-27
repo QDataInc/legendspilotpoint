@@ -35,31 +35,43 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// Step 1: Map Supabase room_number to Square key
-const ROOM_NUMBER_TO_SQUARE_KEY = {
-  'K101': '102',
-  'K102': '109',
-  'Q201': '106',
-  'Q202': '108',
-  'Q203': '113'
-};
-
-// Step 2: Map Square key to catalog ID
-const SQUARE_KEY_TO_CATALOG_ID = {
-  '102': 'T7YM7YWFQNVE5UC6UQB6Q2WR',
-  '109': 'QFTVFSDI45AETRSG3BR3Z4TL',
-  '106': 'IMTX5BV4GFESVG4HYNPCMXYC',
-  '108': 'T2NB4OBAVUTQRLBSLKUXDH5F',
-  '113': 'OC3VQPJVFYHA4AR7AZAE4HQG'
-};
-
-// Step 3: Map Square key to variation IDs (with correct prices)
-const SQUARE_KEY_TO_VARIATION_ID = {
-  '102': { regular: 'OWUPYXWBP25ZPBXYIXOGIAVH', weekend: 'YDS4ZJLVB2AKGBRE3H4QMLQW' }, // K101 $110/$125
-  '109': { regular: 'ABW2CMSCMUCCNIJQBCMUWI3E', weekend: 'PAA4MXTABGT44BSKTPC76TSK' }, // K102 $110/$125
-  '106': { regular: '3YBKN7AUQYDYBVLPGUPN5F3Q', weekend: 'YCGJGEHXRTRY477624AXNUNS' }, // Q201 $120/$135
-  '108': { regular: 'QPZUUFYXJLDFE2TNJKVQML7S', weekend: 'D52V6ZL5M33J5JCOF7STEA24' }, // Q202 $120/$135
-  '113': { regular: 'W4LUBHNAR5YD2KYL33LIOSDQ', weekend: 'QYWXQVU335GM52QESP7AEBNH' }  // Q203 $120/$135
+// Step 1: Map Supabase room_id to Square catalog and variation IDs
+const ROOM_ID_TO_SQUARE = {
+  1: {
+    catalogObjectId: 'QFTVFSDI45AETRSG3BR3Z4TL', // K102
+    variation: {
+      regular: 'ABW2CMSCMUCCNIJQBCMUWI3E',
+      weekend: 'PAA4MXTABGT44BSKTPC76TSK'
+    }
+  },
+  2: {
+    catalogObjectId: 'T7YM7YWFQNVE5UC6UQB6Q2WR', // K101
+    variation: {
+      regular: 'OWUPYXWBP25ZPBXYIXOGIAVH',
+      weekend: 'YDS4ZJLVB2AKGBRE3H4QMLQW'
+    }
+  },
+  3: {
+    catalogObjectId: 'IMTX5BV4GFESVG4HYNPCMXYC', // Q201
+    variation: {
+      regular: '3YBKN7AUQYDYBVLPGUPN5F3Q',
+      weekend: 'YCGJGEHXRTRY477624AXNUNS'
+    }
+  },
+  4: {
+    catalogObjectId: 'T2NB4OBAVUTQRLBSLKUXDH5F', // Q202
+    variation: {
+      regular: 'QPZUUFYXJLDFE2TNJKVQML7S',
+      weekend: 'D52V6ZL5M33J5JCOF7STEA24'
+    }
+  },
+  5: {
+    catalogObjectId: 'OC3VQPJVFYHA4AR7AZAE4HQG', // Q203
+    variation: {
+      regular: 'W4LUBHNAR5YD2KYL33LIOSDQ',
+      weekend: 'QYWXQVU335GM52QESP7AEBNH'
+    }
+  }
 };
 
 // Helper function to calculate number of nights between two dates
@@ -89,11 +101,51 @@ function isWeekend(date) {
 }
 
 app.post('/api/create-payment', async (req, res) => {
-  const { amount, email, guestName, roomType, checkInDate, checkOutDate, room_number, adults, children, special_requests } = req.body;
+  const { room_id, email, guestName, checkInDate, checkOutDate, adults, children, special_requests, roomType } = req.body;
 
   try {
+    // Step 1: Get Square info for this room
+    const squareInfo = ROOM_ID_TO_SQUARE[room_id];
+    if (!squareInfo) {
+      return res.status(400).json({ error: 'Invalid room selected.' });
+    }
+
+    // Step 2: Calculate nights
+    const nights = getDatesBetween(checkInDate, checkOutDate);
+    let regularCount = 0, weekendCount = 0;
+    nights.forEach(date => {
+      if (isWeekend(date)) weekendCount++;
+      else regularCount++;
+    });
+
+    // Step 3: Build line items
+    const lineItems = [];
+    if (regularCount > 0) {
+      lineItems.push({
+        catalogObjectId: squareInfo.variation.regular,
+        quantity: regularCount.toString()
+      });
+    }
+    if (weekendCount > 0) {
+      lineItems.push({
+        catalogObjectId: squareInfo.variation.weekend,
+        quantity: weekendCount.toString()
+      });
+    }
+
+    if (lineItems.length === 0) {
+      return res.status(400).json({ error: 'No nights selected.' });
+    }
+
+    // Step 4: Taxes
+    const taxes = [
+      { uid: 'state-tax', catalogObjectId: 'NOGOG4Z3G2PIFP3ZPH27A2HI' },
+      { uid: 'occupancy-tax', catalogObjectId: 'VEVBQB7THBK4KZN76CE5XFA5' }
+    ];
+
+    // Step 5: Pass booking details in note
     const bookingDetails = {
-      room_number,
+      room_id,
       guest_name: guestName,
       email,
       check_in_date: checkInDate,
@@ -104,50 +156,13 @@ app.post('/api/create-payment', async (req, res) => {
       room_type: roomType
     };
 
-    // Step 1: Map room_number to Square key
-    const squareKey = ROOM_NUMBER_TO_SQUARE_KEY[room_number];
-    // Step 2: Get variation IDs
-    const variationIds = SQUARE_KEY_TO_VARIATION_ID[squareKey];
-    if (!variationIds) {
-      return res.status(400).json({ error: 'Invalid room selected.' });
-    }
-
-    // Count regular and weekend nights
-    const nights = getDatesBetween(checkInDate, checkOutDate);
-    let regularCount = 0, weekendCount = 0;
-    nights.forEach(date => {
-      if (isWeekend(date)) weekendCount++;
-      else regularCount++;
-    });
-
-    // Build line items
-    const lineItems = [];
-    if (regularCount > 0) {
-      lineItems.push({
-        catalogObjectId: variationIds.regular,
-        quantity: regularCount.toString()
-      });
-    }
-    if (weekendCount > 0) {
-      lineItems.push({
-        catalogObjectId: variationIds.weekend,
-        quantity: weekendCount.toString()
-      });
-    }
-
-    if (lineItems.length === 0) {
-      return res.status(400).json({ error: 'No nights selected.' });
-    }
-
+    // Step 6: Create payment link
     const response = await client.checkoutApi.createPaymentLink({
       idempotencyKey: crypto.randomUUID(),
       order: {
         locationId: process.env.SQUARE_LOCATION_ID,
         lineItems,
-        taxes: [
-          { uid: 'state-tax', catalogObjectId: 'NOGOG4Z3G2PIFP3ZPH27A2HI' }, // State Tax 6%
-          { uid: 'occupancy-tax', catalogObjectId: 'VEVBQB7THBK4KZN76CE5XFA5' } // Occupancy Tax 7%
-        ]
+        taxes
       },
       checkoutOptions: {
         redirectUrl: `${process.env.NEXT_PUBLIC_APP_URL}/confirmation`,
