@@ -286,7 +286,9 @@ const RoomDetails = () => {
                   </li>
                   {/* Price for selected night */}
                   <li className="text-[#F56A00] font-bold text-2xl mt-4">
-                    {room.room_type.toLowerCase().includes('king') ? '$110–$125/night' : '$120–$135/night'}
+                    {(checkInDate)
+                      ? `$${getRoomPrice(room.room_type, checkInDate)}/night`
+                      : (room.room_type.toLowerCase().includes('king') ? '$110–$125/night' : '$120–$135/night')}
                   </li>
                   <li className="text-[#F56A00] font-bold text-2xl mt-4">
                     {(checkInDate && checkOutDate) ? `Total for stay: $${getTotalPrice(room.room_type, checkInDate, checkOutDate)}+tax` : 'Select dates'}
