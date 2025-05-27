@@ -74,9 +74,7 @@ const PrivateDining = () => {
                 is perfect.
               </p>
             </div>
-          </section>
-
-          
+          </section>        
           <section className="text-center mt-16">
             <h2 className="text-2xl font-bold text-white">
               Ready to Book Your Private Dining Experience?
