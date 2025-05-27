@@ -152,7 +152,7 @@ const Navbar = () => {
   return (
     <div className={isAdminPage ? 'relative z-50' : ''}>
       <nav
-        className="w-full z-50 bg-[#2E2E2E] fixed top-0 left-0 right-0"
+        className="w-full bg-[#2E2E2E] z-50"
       >
         <div className="container mx-auto flex justify-between items-center px-6 py-2">
           <button 
