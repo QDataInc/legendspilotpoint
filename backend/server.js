@@ -37,42 +37,43 @@ const transporter = nodemailer.createTransport({
 
 // Step 1: Map Supabase room_id to Square catalog and variation IDs
 const ROOM_ID_TO_SQUARE = {
-  1: {
-    catalogObjectId: 'QFTVFSDI45AETRSG3BR3Z4TL', // K102
+  1: { // K101
+    catalogObjectId: '6SCBWWXNEPEVUKJQED66JDLM',
     variation: {
-      regular: 'ABW2CMSCMUCCNIJQBCMUWI3E',
-      weekend: 'PAA4MXTABGT44BSKTPC76TSK'
+      regular: 'ROUQPC5RKRYEG7HDC6BKKX3Z',
+      weekend: 'IQBEPZOX5MORAME5PAPLEUHP'
     }
   },
-  2: {
-    catalogObjectId: 'T7YM7YWFQNVE5UC6UQB6Q2WR', // K101
+  2: { // K102
+    catalogObjectId: 'EPCO7IBVO4EXNQA275A7TSKT',
     variation: {
-      regular: 'OWUPYXWBP25ZPBXYIXOGIAVH',
-      weekend: 'YDS4ZJLVB2AKGBRE3H4QMLQW'
+      regular: '5U3WTMUTPESOZH4JXIIDPJLL',
+      weekend: 'SSKCCA6KKWVBCBJ7HYOHSVFT'
     }
   },
-  3: {
-    catalogObjectId: 'IMTX5BV4GFESVG4HYNPCMXYC', // Q201
+  3: { // Q201
+    catalogObjectId: 'DTP6QLCGFZTEUS2WAMS56CQI',
     variation: {
-      regular: '3YBKN7AUQYDYBVLPGUPN5F3Q',
-      weekend: 'YCGJGEHXRTRY477624AXNUNS'
+      regular: 'ANNWLGWDZIKB62BPLWZTN72G',
+      weekend: '6K3PDTBCSVRLDWRLDCABK56R'
     }
   },
-  4: {
-    catalogObjectId: 'T2NB4OBAVUTQRLBSLKUXDH5F', // Q202
+  4: { // Q202
+    catalogObjectId: 'KTVZTG4N6UXEUMUUXAPZE33D',
     variation: {
-      regular: 'QPZUUFYXJLDFE2TNJKVQML7S',
-      weekend: 'D52V6ZL5M33J5JCOF7STEA24'
+      regular: 'MUWZVENHTLOLWTJ724L4BGTL',
+      weekend: '3IFBNFSF4ITU4AJIXPWRQDGV'
     }
   },
-  5: {
-    catalogObjectId: 'OC3VQPJVFYHA4AR7AZAE4HQG', // Q203
+  5: { // Q203
+    catalogObjectId: 'BLLVGZGDKJQAB6IDACUIMM2F',
     variation: {
-      regular: 'W4LUBHNAR5YD2KYL33LIOSDQ',
-      weekend: 'QYWXQVU335GM52QESP7AEBNH'
+      regular: '5GFGUWCYJKC4C6RQVUGOZQAN',
+      weekend: 'WE7Y7BCZOLDHLKO354TVTLDN'
     }
   }
 };
+
 
 // Helper function to calculate number of nights between two dates
 function calculateNights(checkIn, checkOut) {
