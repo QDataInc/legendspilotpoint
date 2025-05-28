@@ -29,12 +29,15 @@ function ScrollToTop() {
 function App() {
   const [showSplash, setShowSplash] = useState(false);
   const [hasSplashBeenShown, setHasSplashBeenShown] = useState(false);
+  const location = useLocation();
+
   useEffect(() => {
-    // Only show splash if on homepage and not already dismissed in this session
-    if (window.location.pathname === "/" && !sessionStorage.getItem("splashDismissed")) {
+    if (location.pathname === "/" && !sessionStorage.getItem("splashDismissed")) {
       setShowSplash(true);
+    } else {
+      setShowSplash(false);
     }
-  }, []);
+  }, [location.pathname]);
   const handleCloseSplash = () => {
     setShowSplash(false);
     sessionStorage.setItem("splashDismissed", "true");
