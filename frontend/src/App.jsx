@@ -137,6 +137,27 @@ function App() {
                 textShadow: "0 1px 6px #2d1b0e"
               }}>
                 Four HorseMen Hotel is now Legends Bar & Grill. Book your stay with us.<br />
+                <a
+                  href="/Reservation"
+                  style={{
+                    display: "inline-block",
+                    margin: "0.5rem 0 0.5rem 0",
+                    color: "#fffbe8",
+                    background: "#a67c52",
+                    padding: "0.4rem 1.2rem",
+                    borderRadius: "18px",
+                    fontWeight: 700,
+                    fontFamily: "'Cinzel', serif",
+                    fontSize: "1.05rem",
+                    textDecoration: "none",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.10)",
+                    transition: "background 0.2s, color 0.2s"
+                  }}
+                  onMouseOver={e => { e.target.style.background = '#e7d3b1'; e.target.style.color = '#8B2500'; }}
+                  onMouseOut={e => { e.target.style.background = '#a67c52'; e.target.style.color = '#fffbe8'; }}
+                >
+                  Book a Reservation
+                </a><br />
                 Stay tuned for grand opening details!
               </div>
               {/* Decorative Border/Flourish */}
