@@ -156,7 +156,10 @@ const Navbar = () => {
       >
         <div className="container mx-auto flex justify-between items-center px-6 py-2">
           <button 
-            onClick={() => handleNavigation("/")}
+            onClick={() => {
+              sessionStorage.removeItem("splashDismissed");
+              handleNavigation("/");
+            }}
           >
             <img
               src="/img-vid/logo.png"
