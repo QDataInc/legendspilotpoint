@@ -179,7 +179,7 @@ const Reservation = () => {
           Book Your Stay
         </h1>
         <h2 className="text-2xl font-['Cinzel'] text-center text-[#2E2E2E] mb-4 font-bold">
-          Four Horse Men is now Legends Bar and Grill
+          Four HorseMen is now Legends Bar and Grill
         </h2>
         <p className="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
           Experience the perfect blend of comfort and rustic charm at our restaurant. Select your dates and find your ideal room.
