@@ -338,23 +338,23 @@ app.post('/api/book-room', async (req, res) => {
   }
 });
 
-// Scheduled cleanup: run every day at 2:00 AM
-cron.schedule('0 2 * * *', async () => {
-  try {
-    const today = new Date().toISOString().slice(0, 10);
-    const { error } = await supabase
-      .from('bookings')
-      .delete()
-      .lt('check_out_date', today);
-    if (error) {
-      console.error('Cleanup error:', error);
-    } else {
-      console.log('Old bookings cleaned up successfully');
-    }
-  } catch (err) {
-    console.error('Unexpected cleanup error:', err);
-  }
-});
+// // Scheduled cleanup: run every day at 2:00 AM
+// cron.schedule('0 2 * * *', async () => {
+//   try {
+//     const today = new Date().toISOString().slice(0, 10);
+//     const { error } = await supabase
+//       .from('bookings')
+//       .delete()
+//       .lt('check_out_date', today);
+//     if (error) {
+//       console.error('Cleanup error:', error);
+//     } else {
+//       console.log('Old bookings cleaned up successfully');
+//     }
+//   } catch (err) {
+//     console.error('Unexpected cleanup error:', err);
+//   }
+// });
 
 // Endpoint to fetch all Square tax catalog objects (for admin use)
 app.get('/api/square-taxes', async (req, res) => {
