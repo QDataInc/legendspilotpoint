@@ -224,13 +224,29 @@ app.post('/api/confirm-booking', async (req, res) => {
         to: bookingDetails.email,
         subject: 'Booking Confirmation - Legends Pilot Point',
         html: `
-          <p>Thank you for your booking, <b>${bookingDetails.guestName}</b>!</p>
-          <p>Room Type: <b>${bookingDetails.roomType}</b></p>
-          <p>Your check-in date: <b>${bookingDetails.checkInDate}</b></p>
-          <p>Your check-out date: <b>${bookingDetails.checkOutDate}</b></p>
-          <p>Your room has been reserved and we look forward to hosting you.</p>
-          <p>Best regards,<br/>Legends Pilot Point Team</p>
-        `,
+          <p>Dear ${bookingDetails.guestName},</p>
+
+    <p>We are pleased to confirm your reservation for a room with a double bed at <b>Four Horsemen Hotel</b>.</p>
+    <p>Your check-in date is <b>${bookingDetails.checkInDate}</b> and your check-out date is <b>${bookingDetails.checkOutDate}</b>.</p>
+    
+    <p>We hope that your stay with us will be comfortable and enjoyable.</p>
+    
+    <p>Please remember to bring a valid photo ID with you when you check in. If you have any additional requests or questions, please do not hesitate to contact us.</p>
+
+    <br/>
+
+    <p><b>Cancellation Policy:</b><br/>
+    If you cancel your reservation 48 hours before the check-in time, there will be no cancellation fee.<br/>
+    However, if you cancel within 48 hours of the check-in time, a cancellation fee will be charged.</p>
+
+    <br/>
+
+    <p>Thank you for choosing our hotel for your stay. We look forward to welcoming you soon!</p>
+
+    <p>Best regards,<br/>
+    <b>Management – Four Horsemen Hotel</b></p>
+  `,
+         
       });
     } catch (emailError) {
       console.error('Failed to send confirmation email:', emailError);
