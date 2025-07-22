@@ -120,7 +120,7 @@ const AdminDashboard = () => {
           <tbody className="bg-white divide-y divide-gray-200">
             {bookings.map((booking) => (
               <tr key={booking.id}>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{booking.name}</td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{booking.guest_name}</td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{booking.phone}</td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{booking.email}</td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{booking.room_type}</td>
