@@ -226,7 +226,7 @@ app.post('/api/confirm-booking', async (req, res) => {
         html: `
           <p>Dear ${bookingDetails.guestName},</p>
 
-    <p>We are pleased to confirm your reservation for a room with a double bed at <b>Four Horsemen Hotel</b>.</p>
+    <p>We are pleased to confirm your reservation for a <b>${bookingDetails.roomType}</b> at <b>Four Horsemen Hotel</b>.</p>
     <p>Your check-in date is <b>${bookingDetails.checkInDate}</b> and your check-out date is <b>${bookingDetails.checkOutDate}</b>.</p>
     
     <p>We hope that your stay with us will be comfortable and enjoyable.</p>
