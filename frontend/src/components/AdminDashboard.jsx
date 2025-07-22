@@ -74,7 +74,7 @@ const AdminDashboard = () => {
         .eq('id', id);
 
       if (error) throw error;
-      fetchBookings(); // Refresh the bookings list
+      fetchBookings(); // 
     } catch (error) {
       setError(error.message);
     }
@@ -109,6 +109,8 @@ const AdminDashboard = () => {
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Room Type</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Check In</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Check Out</th>
@@ -123,6 +125,8 @@ const AdminDashboard = () => {
                   <div className="text-sm font-medium text-gray-900">{booking.name}</div>
                   <div className="text-sm text-gray-500">{booking.email}</div>
                 </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{booking.phone}</td>
+
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {booking.room_type}
                 </td>
