@@ -120,44 +120,24 @@ const AdminDashboard = () => {
           <tbody className="bg-white divide-y divide-gray-200">
             {bookings.map((booking) => (
               <tr key={booking.id}>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-gray-900">{booking.name}</div>
-                  <div className="text-sm text-gray-500">{booking.email}</div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{booking.phone}</td>
-
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {booking.room_type}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {parseLocalDate(booking.check_in_date).toLocaleDateString()}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {parseLocalDate(booking.check_out_date).toLocaleDateString()}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                    booking.status === 'confirmed' ? 'bg-green-100 text-green-800' :
-                    booking.status === 'cancelled' ? 'bg-red-100 text-red-800' :
-                    'bg-yellow-100 text-yellow-800'
-                  }`}>
-                    {booking.status}
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{booking.name}</td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{booking.phone}</td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{booking.email}</td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{booking.room_type}</td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{parseLocalDate(booking.check_in_date).toLocaleDateString()}</td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{parseLocalDate(booking.check_out_date).toLocaleDateString()}</td>
+              <td className="px-6 py-4 whitespace-nowrap">
+                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                  booking.status === 'confirmed' ? 'bg-green-100 text-green-800' :
+                  booking.status === 'cancelled' ? 'bg-red-100 text-red-800' :
+                  'bg-yellow-100 text-yellow-800'
+                }`}>
+              
+             
+                  {booking.status}
                   </span>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <button
-                    onClick={() => updateBookingStatus(booking.id, 'confirmed')}
-                    className="text-green-600 hover:text-green-900 mr-4"
-                  >
-                    Confirm
-                  </button>
-                  <button
-                    onClick={() => updateBookingStatus(booking.id, 'cancelled')}
-                    className="text-red-600 hover:text-red-900"
-                  >
-                    Cancel
-                  </button>
-                </td>
+                
               </tr>
             ))}
           </tbody>
