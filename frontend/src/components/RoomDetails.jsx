@@ -39,7 +39,9 @@ const RoomDetails = () => {
     checkInDate,
     checkOutDate,
     adults,
-    children
+    children,
+    hasPets: false,
+    numPets: 0
   });
 
   const [error, setError] = useState('');
@@ -117,7 +119,7 @@ const RoomDetails = () => {
       }
 
       const bookingData = {
-        amount: getTotalPrice(room.room_type, bookingInfo.checkInDate, bookingInfo.checkOutDate),
+        amount: getTotalPrice(room.room_type, bookingInfo.checkInDate, bookingInfo.checkOutDate, bookingInfo.hasPets, bookingInfo.numPets),
         email: bookingInfo.email,
         guestName: bookingInfo.fullName,
         phone: bookingInfo.phone,
@@ -127,7 +129,9 @@ const RoomDetails = () => {
         room_id: room.id,
         adults: bookingInfo.adults,
         children: bookingInfo.children,
-        special_requests: bookingInfo.specialRequests
+        special_requests: bookingInfo.specialRequests,
+        hasPets: bookingInfo.hasPets,
+        numPets: bookingInfo.numPets
       };
 
       // Store booking data in localStorage
@@ -207,10 +211,19 @@ const RoomDetails = () => {
     return dates;
   }
 
-  // Calculate total price for the stay
-  function getTotalPrice(roomType, checkIn, checkOut) {
+  // Pet fee calculation
+  function getPetFee(checkIn, checkOut, numPets) {
+    if (!checkIn || !checkOut || !numPets || numPets < 1) return 0;
+    const nights = getDatesBetween(checkIn, checkOut).length;
+    return nights * 20 * numPets;
+  }
+
+  // Calculate total price for the stay (including pet fee)
+  function getTotalPrice(roomType, checkIn, checkOut, hasPets = false, numPets = 0) {
     const nights = getDatesBetween(checkIn, checkOut);
-    return nights.reduce((sum, date) => sum + getRoomPrice(roomType, date.toISOString().slice(0, 10)), 0);
+    const roomTotal = nights.reduce((sum, date) => sum + getRoomPrice(roomType, date.toISOString().slice(0, 10)), 0);
+    const petFee = hasPets ? getPetFee(checkIn, checkOut, numPets) : 0;
+    return roomTotal + petFee;
   }
 
   console.log('Room type:', room.room_type, 'Check-in:', bookingInfo.checkInDate, 'Calculated price:', getRoomPrice(room.room_type, bookingInfo.checkInDate));
@@ -291,8 +304,14 @@ const RoomDetails = () => {
                       : (room.room_type.toLowerCase().includes('king') ? '$110–$125/night' : '$120–$135/night')}
                   </li>
                   <li className="text-[#F56A00] font-bold text-2xl mt-4">
-                    {(checkInDate && checkOutDate) ? `Total for stay: $${getTotalPrice(room.room_type, checkInDate, checkOutDate)}+tax` : 'Select dates'}
+                    {(checkInDate && checkOutDate) ? `Total for stay: $${getTotalPrice(room.room_type, checkInDate, checkOutDate, bookingInfo.hasPets, bookingInfo.numPets)}+tax` : 'Select dates'}
                   </li>
+                  {/* Pet fee breakdown */}
+                  {bookingInfo.hasPets && checkInDate && checkOutDate && (
+                    <li className="text-[#8B2500] text-lg mt-2">
+                      Pet fee: ${getPetFee(checkInDate, checkOutDate, bookingInfo.numPets)}
+                    </li>
+                  )}
                 </ul>
               </div>
 
@@ -411,6 +430,49 @@ const RoomDetails = () => {
                         placeholder="Any special requests or preferences?"
                       />
                     </div>
+                    {/* Pet selection */}
+                    <div>
+                      <label className="block text-[#2E2E2E] font-semibold mb-2">Bringing Pets?</label>
+                      <div className="flex items-center space-x-6">
+                        <label className="flex items-center">
+                          <input
+                            type="radio"
+                            name="hasPets"
+                            value={true}
+                            checked={bookingInfo.hasPets === true || bookingInfo.hasPets === 'true'}
+                            onChange={() => setBookingInfo(prev => ({ ...prev, hasPets: true, numPets: prev.numPets || 1 }))}
+                            className="mr-2"
+                          />
+                          Yes
+                        </label>
+                        <label className="flex items-center">
+                          <input
+                            type="radio"
+                            name="hasPets"
+                            value={false}
+                            checked={bookingInfo.hasPets === false || bookingInfo.hasPets === 'false'}
+                            onChange={() => setBookingInfo(prev => ({ ...prev, hasPets: false, numPets: 0 }))}
+                            className="mr-2"
+                          />
+                          No
+                        </label>
+                      </div>
+                    </div>
+                    {bookingInfo.hasPets && (
+                      <div>
+                        <label className="block text-[#2E2E2E] font-semibold mb-2">Number of Pets</label>
+                        <input
+                          type="number"
+                          name="numPets"
+                          min="1"
+                          max="5"
+                          value={bookingInfo.numPets}
+                          onChange={e => setBookingInfo(prev => ({ ...prev, numPets: Math.max(1, parseInt(e.target.value) || 1) }))}
+                          className="w-24 px-4 py-2 text-lg border border-[#D8CFC4] rounded-lg focus:ring-2 focus:ring-[#F56A00] focus:border-[#F56A00] bg-white/90 backdrop-blur-sm transition-all duration-300"
+                        />
+                        <span className="ml-2 text-sm text-gray-600">($20/night per pet)</span>
+                      </div>
+                    )}
                   </div>
                 </div>
 
