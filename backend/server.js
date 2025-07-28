@@ -119,7 +119,11 @@ app.post('/api/create-payment', async (req, res) => {
       else regularCount++;
     });
 
-    const appliedTaxes = ['state-tax', 'occupancy-tax'];
+    const appliedTaxes = [
+      { uid: 'state-tax' },
+      { uid: 'occupancy-tax' }
+    ];
+    
 
     // const appliedTaxes = [
     //   { uid: 'state-tax', taxUid: 'state-tax' },
