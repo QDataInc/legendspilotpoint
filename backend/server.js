@@ -119,13 +119,14 @@ app.post('/api/create-payment', async (req, res) => {
       else regularCount++;
     });
 
-    // Step 3: Build line items
-    const lineItems = [];
     const appliedTaxes = [
       { uid: 'state-tax', taxUid: 'state-tax' },
       { uid: 'occupancy-tax', taxUid: 'occupancy-tax' }
     ];
     
+    // Step 3: Build line items
+    const lineItems = [];
+   
     
 
     if (regularCount > 0) {
@@ -151,7 +152,8 @@ app.post('/api/create-payment', async (req, res) => {
 
       lineItems.push({
         catalogObjectId: 'LZW2KLBNPHZDVLTYN2UHXCD4', // replace with your actual pet fee variation ID
-        quantity: petQuantity.toString()
+        quantity: petQuantity.toString(),
+        appliedTaxes: [] 
         // 🚫 no appliedTaxes here
       });
     }
