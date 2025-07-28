@@ -222,6 +222,8 @@ app.post('/api/confirm-booking', async (req, res) => {
         children: bookingDetails.children,
         special_requests: bookingDetails.special_requests,
         room_type: bookingDetails.roomType,
+        has_pets: bookingDetails.hasPets || false,
+        num_pets: bookingDetails.numPets || 0,
         status: 'confirmed'
       }]);
 
