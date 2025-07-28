@@ -120,7 +120,6 @@ app.post('/api/create-payment', async (req, res) => {
     });
 
     // Step 3: Build line items
-    // Step 3: Build line items
     const lineItems = [];
     const appliedTaxes = [
       {
@@ -167,11 +166,11 @@ app.post('/api/create-payment', async (req, res) => {
     }
 
     
-    // Step 4: Taxes
-    const taxes = [
-      { uid: 'state-tax', catalogObjectId: '36IIU7DDUY3NUUA7O3CSWD6L' },
-      { uid: 'occupancy-tax', catalogObjectId: '3OEAVFNFCSQEKCNHJ7LYTBAS' }
-    ];
+    // // Step 4: Taxes
+    // const taxes = [
+    //   { uid: 'state-tax', catalogObjectId: '36IIU7DDUY3NUUA7O3CSWD6L' },
+    //   { uid: 'occupancy-tax', catalogObjectId: '3OEAVFNFCSQEKCNHJ7LYTBAS' }
+    // ];
 
     // Step 5: Pass booking details in note
     const bookingDetails = {
@@ -193,8 +192,9 @@ app.post('/api/create-payment', async (req, res) => {
       idempotencyKey: crypto.randomUUID(),
       order: {
         locationId: process.env.SQUARE_LOCATION_ID,
-        lineItems,
-        taxes
+        lineItems
+        // lineItems,
+        // taxes
       },
       checkoutOptions: {
         redirectUrl: `${process.env.NEXT_PUBLIC_APP_URL}/confirmation`,
