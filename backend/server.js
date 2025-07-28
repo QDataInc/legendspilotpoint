@@ -120,27 +120,38 @@ app.post('/api/create-payment', async (req, res) => {
     });
 
     // Step 3: Build line items
+    // Step 3: Build line items
     const lineItems = [];
+    const appliedTaxes = [
+      { uid: 'state-tax' },
+      { uid: 'occupancy-tax' }
+    ];
+
     if (regularCount > 0) {
       lineItems.push({
         catalogObjectId: squareInfo.variation.regular,
-        quantity: regularCount.toString()
-      });
-    }
-    if (weekendCount > 0) {
-      lineItems.push({
-        catalogObjectId: squareInfo.variation.weekend,
-        quantity: weekendCount.toString()
+        quantity: regularCount.toString(),
+        appliedTaxes
       });
     }
 
+    if (weekendCount > 0) {
+      lineItems.push({
+        catalogObjectId: squareInfo.variation.weekend,
+        quantity: weekendCount.toString(),
+        appliedTaxes
+      });
+    }
+
+    // ✅ Add pet fee WITHOUT taxes
     if (hasPets && numPets > 0) {
       const petNights = nights.length;
       const petQuantity = petNights * numPets;
-    
+
       lineItems.push({
-        catalogObjectId: 'LZW2KLBNPHZDVLTYN2UHXCD4', // Pet Fee variation ID
+        catalogObjectId: 'LZW2KLBNPHZDVLTYN2UHXCD4', // replace with your actual pet fee variation ID
         quantity: petQuantity.toString()
+        // 🚫 no appliedTaxes here
       });
     }
 
@@ -148,6 +159,7 @@ app.post('/api/create-payment', async (req, res) => {
       return res.status(400).json({ error: 'No nights selected.' });
     }
 
+    
     // Step 4: Taxes
     const taxes = [
       { uid: 'state-tax', catalogObjectId: '36IIU7DDUY3NUUA7O3CSWD6L' },
@@ -164,7 +176,9 @@ app.post('/api/create-payment', async (req, res) => {
       adults,
       children,
       special_requests,
-      room_type: roomType
+      room_type: roomType,
+      hasPets,
+      numPets
     };
 
     // Step 6: Create payment link
