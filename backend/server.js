@@ -123,9 +123,16 @@ app.post('/api/create-payment', async (req, res) => {
     // Step 3: Build line items
     const lineItems = [];
     const appliedTaxes = [
-      { uid: 'state-tax' },
-      { uid: 'occupancy-tax' }
+      {
+        uid: 'state-tax',
+        taxUid: '36IIU7DDUY3NUUA7O3CSWD6L' // state tax catalogObjectId
+      },
+      {
+        uid: 'occupancy-tax',
+        taxUid: '3OEAVFNFCSQEKCNHJ7LYTBAS' // occupancy tax catalogObjectId
+      }
     ];
+    
 
     if (regularCount > 0) {
       lineItems.push({
