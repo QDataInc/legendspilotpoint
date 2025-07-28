@@ -119,10 +119,13 @@ app.post('/api/create-payment', async (req, res) => {
       else regularCount++;
     });
 
+
     const appliedTaxes = [
-      { uid: 'state-tax' },
-      { uid: 'occupancy-tax' }
+      { uid: 'tax1', taxUid: 'tax1' },
+      { uid: 'tax2', taxUid: 'tax2' }
     ];
+    
+    
     
 
     // const appliedTaxes = [
@@ -171,18 +174,15 @@ app.post('/api/create-payment', async (req, res) => {
     // Step 4: Taxes
     const taxes = [
       {
-        uid: 'state-tax',
-        name: 'State Tax',
-        percentage: '6.0',
-        scope: 'ORDER'
+        uid: 'tax1',
+        catalogObjectId: '36IIU7DDUY3NUUA7O3CSWD6L' // State Tax
       },
       {
-        uid: 'occupancy-tax',
-        name: 'Occupancy Tax',
-        percentage: '7.0',
-        scope: 'ORDER'
+        uid: 'tax2',
+        catalogObjectId: '3OEAVFNFCSQEKCNHJ7LYTBAS' // Occupancy Tax
       }
     ];
+    
     
 
     // Step 5: Pass booking details in note
