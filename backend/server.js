@@ -163,9 +163,20 @@ app.post('/api/create-payment', async (req, res) => {
     
     // Step 4: Taxes
     const taxes = [
-      { uid: 'state-tax', catalogObjectId: '36IIU7DDUY3NUUA7O3CSWD6L' },
-      { uid: 'occupancy-tax', catalogObjectId: '3OEAVFNFCSQEKCNHJ7LYTBAS' }
+      {
+        uid: 'state-tax',
+        name: 'State Tax',
+        percentage: '6.0',
+        scope: 'ORDER'
+      },
+      {
+        uid: 'occupancy-tax',
+        name: 'Occupancy Tax',
+        percentage: '7.0',
+        scope: 'ORDER'
+      }
     ];
+    
 
     // Step 5: Pass booking details in note
     const bookingDetails = {
