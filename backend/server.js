@@ -122,15 +122,10 @@ app.post('/api/create-payment', async (req, res) => {
     // Step 3: Build line items
     const lineItems = [];
     const appliedTaxes = [
-      {
-        uid: 'state-tax',
-        taxUid: '36IIU7DDUY3NUUA7O3CSWD6L' // state tax catalogObjectId
-      },
-      {
-        uid: 'occupancy-tax',
-        taxUid: '3OEAVFNFCSQEKCNHJ7LYTBAS' // occupancy tax catalogObjectId
-      }
+      { uid: 'state-tax', taxUid: 'state-tax' },
+      { uid: 'occupancy-tax', taxUid: 'occupancy-tax' }
     ];
+    
     
 
     if (regularCount > 0) {
@@ -166,11 +161,11 @@ app.post('/api/create-payment', async (req, res) => {
     }
 
     
-    // // Step 4: Taxes
-    // const taxes = [
-    //   { uid: 'state-tax', catalogObjectId: '36IIU7DDUY3NUUA7O3CSWD6L' },
-    //   { uid: 'occupancy-tax', catalogObjectId: '3OEAVFNFCSQEKCNHJ7LYTBAS' }
-    // ];
+    // Step 4: Taxes
+    const taxes = [
+      { uid: 'state-tax', catalogObjectId: '36IIU7DDUY3NUUA7O3CSWD6L' },
+      { uid: 'occupancy-tax', catalogObjectId: '3OEAVFNFCSQEKCNHJ7LYTBAS' }
+    ];
 
     // Step 5: Pass booking details in note
     const bookingDetails = {
@@ -192,7 +187,8 @@ app.post('/api/create-payment', async (req, res) => {
       idempotencyKey: crypto.randomUUID(),
       order: {
         locationId: process.env.SQUARE_LOCATION_ID,
-        lineItems
+        lineItems,
+        taxes
         // lineItems,
         // taxes
       },
