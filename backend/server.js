@@ -38,38 +38,38 @@ const transporter = nodemailer.createTransport({
 // Step 1: Map Supabase room_id to Square catalog and variation IDs
 const ROOM_ID_TO_SQUARE = {
   1: { // K101
-    catalogObjectId: '6SCBWWXNEPEVUKJQED66JDLM',
+    catalogObjectId: 'DAQLQRW3N6GXHNRBPIM7GICE',
     variation: {
-      regular: 'ROUQPC5RKRYEG7HDC6BKKX3Z',
-      weekend: 'IQBEPZOX5MORAME5PAPLEUHP'
+      regular: 'PGQ4QS54IO446Q5VG5JVEDFU',
+      weekend: '57J4YVAXWLPPMUFQEGSXDU6V'
     }
   },
   2: { // K102
-    catalogObjectId: 'EPCO7IBVO4EXNQA275A7TSKT',
+    catalogObjectId: 'YKX5TUKCBCWTOD4IN4RVCQYY',
     variation: {
-      regular: '5U3WTMUTPESOZH4JXIIDPJLL',
-      weekend: 'SSKCCA6KKWVBCBJ7HYOHSVFT'
+      regular: 'W7YPBOHAURT3B4GPLNOFH3VO',
+      weekend: 'AMYAFBPJBNJQ5WGYDFOG7D45'
     }
   },
   3: { // Q201
-    catalogObjectId: 'DTP6QLCGFZTEUS2WAMS56CQI',
+    catalogObjectId: 'ON2XD7OHTW2BYCMMEP4A5HTU',
     variation: {
-      regular: 'ANNWLGWDZIKB62BPLWZTN72G',
-      weekend: '6K3PDTBCSVRLDWRLDCABK56R'
+      regular: 'IFF676IGM2YS2A2SPWJU223M',
+      weekend: 'HQS5AVTPT3GZODY2LMPK3BHX'
     }
   },
   4: { // Q202
-    catalogObjectId: 'KTVZTG4N6UXEUMUUXAPZE33D',
+    catalogObjectId: 'HFUELTYFWK7UHHBONN2ICCCP',
     variation: {
-      regular: 'MUWZVENHTLOLWTJ724L4BGTL',
-      weekend: '3IFBNFSF4ITU4AJIXPWRQDGV'
+      regular: 'Z4M76HDEUXZPJ73OWGN23VK4',
+      weekend: '2Z3VBY6RGTEPULUR2XVO7F7W'
     }
   },
   5: { // Q203
-    catalogObjectId: 'BLLVGZGDKJQAB6IDACUIMM2F',
+    catalogObjectId: 'QSRPWPMJZPGREKU6HKDOZ7MQ',
     variation: {
-      regular: '5GFGUWCYJKC4C6RQVUGOZQAN',
-      weekend: 'WE7Y7BCZOLDHLKO354TVTLDN'
+      regular: '3MSZ45OB3HXISSSOH6OYWWOZ',
+      weekend: 'W7XV2HW3BDDK6PNKWUVSRXJX'
     }
   }
 };
@@ -248,6 +248,30 @@ app.post('/api/confirm-booking', async (req, res) => {
   `,
          
       });
+
+      // Send booking alert to admin
+await transporter.sendMail({
+  from: process.env.EMAIL_USER,
+  to: process.env.ADMIN_EMAIL,
+  subject: 'New Booking Received - Four Horsemen Hotel',
+  html: `
+    <p>A new booking has been received:</p>
+
+    <ul>
+      <li><b>Name:</b> ${bookingDetails.guestName}</li>
+      <li><b>Email:</b> ${bookingDetails.email}</li>
+      <li><b>Phone:</b> ${bookingDetails.phone}</li>
+      <li><b>Room Type:</b> ${bookingDetails.roomType}</li>
+      <li><b>Check-in:</b> ${bookingDetails.checkInDate}</li>
+      <li><b>Check-out:</b> ${bookingDetails.checkOutDate}</li>
+      <li><b>Adults:</b> ${bookingDetails.adults}</li>
+      <li><b>Children:</b> ${bookingDetails.children}</li>
+      <li><b>Special Requests:</b> ${bookingDetails.special_requests || 'None'}</li>
+    </ul>
+
+    <p>Please check Supabase or your admin dashboard for full details.</p>
+  `,
+});
     } catch (emailError) {
       console.error('Failed to send confirmation email:', emailError);
       // Optionally, you can still return success, or return a warning to the frontend
