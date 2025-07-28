@@ -102,7 +102,7 @@ function isWeekend(date) {
 }
 
 app.post('/api/create-payment', async (req, res) => {
-  const { room_id, email, guestName, checkInDate, checkOutDate, adults, children, special_requests, roomType } = req.body;
+  const { room_id, email, guestName, checkInDate, checkOutDate, adults, children, special_requests, roomType, hasPets, numPets } = req.body;
 
   try {
     // Step 1: Get Square info for this room
@@ -131,6 +131,16 @@ app.post('/api/create-payment', async (req, res) => {
       lineItems.push({
         catalogObjectId: squareInfo.variation.weekend,
         quantity: weekendCount.toString()
+      });
+    }
+
+    if (hasPets && numPets > 0) {
+      const petNights = nights.length;
+      const petQuantity = petNights * numPets;
+    
+      lineItems.push({
+        catalogObjectId: 'LZW2KLBNPHZDVLTYN2UHXCD4', // Pet Fee variation ID
+        quantity: petQuantity.toString()
       });
     }
 
