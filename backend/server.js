@@ -1,3 +1,4 @@
+
 import express from 'express';
 
 import cors from 'cors';
@@ -119,50 +120,28 @@ app.post('/api/create-payment', async (req, res) => {
       else regularCount++;
     });
 
-
-    const appliedTaxes = [
-      { uid: 'tax1', taxUid: 'tax1' },
-      { uid: 'tax2', taxUid: 'tax2' }
-    ];
-    
-    
-    
-
-    // const appliedTaxes = [
-    //   { uid: 'state-tax', taxUid: 'state-tax' },
-    //   { uid: 'occupancy-tax', taxUid: 'occupancy-tax' }
-    // ];
-    
     // Step 3: Build line items
     const lineItems = [];
-   
-    
-
     if (regularCount > 0) {
       lineItems.push({
         catalogObjectId: squareInfo.variation.regular,
-        quantity: regularCount.toString(),
-        appliedTaxes
+        quantity: regularCount.toString()
       });
     }
-
     if (weekendCount > 0) {
       lineItems.push({
         catalogObjectId: squareInfo.variation.weekend,
-        quantity: weekendCount.toString(),
-        appliedTaxes
+        quantity: weekendCount.toString()
       });
     }
 
-    // ✅ Add pet fee WITHOUT taxes
     if (hasPets && numPets > 0) {
       const petNights = nights.length;
       const petQuantity = petNights * numPets;
-
+    
       lineItems.push({
-        catalogObjectId: 'LZW2KLBNPHZDVLTYN2UHXCD4', // replace with your actual pet fee variation ID
+        catalogObjectId: 'LZW2KLBNPHZDVLTYN2UHXCD4', // Pet Fee variation ID
         quantity: petQuantity.toString()
-        // 🚫 no appliedTaxes here
       });
     }
 
@@ -170,20 +149,11 @@ app.post('/api/create-payment', async (req, res) => {
       return res.status(400).json({ error: 'No nights selected.' });
     }
 
-    
     // Step 4: Taxes
     const taxes = [
-      {
-        uid: 'tax1',
-        catalogObjectId: '36IIU7DDUY3NUUA7O3CSWD6L' // State Tax
-      },
-      {
-        uid: 'tax2',
-        catalogObjectId: '3OEAVFNFCSQEKCNHJ7LYTBAS' // Occupancy Tax
-      }
+      { uid: 'state-tax', catalogObjectId: '36IIU7DDUY3NUUA7O3CSWD6L' },
+      { uid: 'occupancy-tax', catalogObjectId: '3OEAVFNFCSQEKCNHJ7LYTBAS' }
     ];
-    
-    
 
     // Step 5: Pass booking details in note
     const bookingDetails = {
@@ -195,9 +165,7 @@ app.post('/api/create-payment', async (req, res) => {
       adults,
       children,
       special_requests,
-      room_type: roomType,
-      hasPets,
-      numPets
+      room_type: roomType
     };
 
     // Step 6: Create payment link
@@ -207,8 +175,6 @@ app.post('/api/create-payment', async (req, res) => {
         locationId: process.env.SQUARE_LOCATION_ID,
         lineItems,
         taxes
-        // lineItems,
-        // taxes
       },
       checkoutOptions: {
         redirectUrl: `${process.env.NEXT_PUBLIC_APP_URL}/confirmation`,
