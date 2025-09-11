@@ -76,15 +76,6 @@ const ROOM_ID_TO_SQUARE = {
 };
 
 
-// Helper function to calculate number of nights between two dates
-function calculateNights(checkIn, checkOut) {
-  const start = new Date(checkIn);
-  const end = new Date(checkOut);
-  const diffTime = Math.abs(end - start);
-  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-}
-
-// Helper to get all dates between two dates (exclusive of end date)
 function getDatesBetween(start, end) {
   const dates = [];
   let current = new Date(start);
@@ -96,11 +87,13 @@ function getDatesBetween(start, end) {
   return dates;
 }
 
-// Helper to check if a date is a weekend
 function isWeekend(date) {
   const day = date.getDay();
   return day === 0 || day === 6; // Sunday or Saturday
 }
+
+
+
 
 app.post('/api/create-payment', async (req, res) => {
   const { room_id, email, guestName, checkInDate, checkOutDate, adults, children, special_requests, roomType, hasPets, numPets } = req.body;
@@ -204,13 +197,95 @@ async function checkSquarePaymentStatus(transactionId) {
   }
 }
 
-// Endpoint to confirm booking after successful payment
+// Create Square payment link
+app.post('/api/create-payment', async (req, res) => {
+  const { room_id, email, guestName, checkInDate, checkOutDate, adults, children, special_requests, roomType, hasPets, numPets } = req.body;
+
+  try {
+    const squareInfo = ROOM_ID_TO_SQUARE[room_id];
+    if (!squareInfo) {
+      return res.status(400).json({ error: 'Invalid room selected.' });
+    }
+
+    const nights = getDatesBetween(checkInDate, checkOutDate);
+    let regularCount = 0, weekendCount = 0;
+    nights.forEach(date => {
+      if (isWeekend(date)) weekendCount++;
+      else regularCount++;
+    });
+
+    const lineItems = [];
+    if (regularCount > 0) {
+      lineItems.push({
+        catalogObjectId: squareInfo.variation.regular,
+        quantity: regularCount.toString()
+      });
+    }
+    if (weekendCount > 0) {
+      lineItems.push({
+        catalogObjectId: squareInfo.variation.weekend,
+        quantity: weekendCount.toString()
+      });
+    }
+
+    if (hasPets && numPets > 0) {
+      const petNights = nights.length;
+      const petQuantity = petNights * numPets;
+      lineItems.push({
+        catalogObjectId: 'LZW2KLBNPHZDVLTYN2UHXCD4', // Pet Fee variation ID
+        quantity: petQuantity.toString()
+      });
+    }
+
+    if (lineItems.length === 0) {
+      return res.status(400).json({ error: 'No nights selected.' });
+    }
+
+    const taxes = [
+      { uid: 'state-tax', catalogObjectId: '36IIU7DDUY3NUUA7O3CSWD6L' },
+      { uid: 'occupancy-tax', catalogObjectId: '3OEAVFNFCSQEKCNHJ7LYTBAS' }
+    ];
+
+    const bookingDetails = {
+      room_id,
+      guest_name: guestName,
+      email,
+      check_in_date: checkInDate,
+      check_out_date: checkOutDate,
+      adults,
+      children,
+      special_requests,
+      room_type: roomType
+    };
+
+    const response = await client.checkoutApi.createPaymentLink({
+      idempotencyKey: crypto.randomUUID(),
+      order: {
+        locationId: process.env.SQUARE_LOCATION_ID,
+        lineItems,
+        taxes
+      },
+      checkoutOptions: {
+        redirectUrl: `${process.env.NEXT_PUBLIC_APP_URL}/confirmation`,
+        askForShippingAddress: false,
+        email,
+      },
+      note: JSON.stringify(bookingDetails)
+    });
+
+    res.json({ url: response.result.paymentLink.url });
+  } catch (error) {
+    console.error('Error creating payment link:', error);
+    res.status(500).json({ error: 'Failed to generate payment link' });
+  }
+});
+
+// Confirm booking (after payment)
 app.post('/api/confirm-booking', async (req, res) => {
   const bookingDetails = req.body;
 
   try {
-    // Insert booking
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('bookings')
       .insert([{
         room_id: bookingDetails.room_id,
@@ -230,65 +305,20 @@ app.post('/api/confirm-booking', async (req, res) => {
 
     if (error) return res.status(500).json({ error: error.message });
 
-    // Send confirmation email
-    try {
-      await transporter.sendMail({
-        from: process.env.EMAIL_USER,
-        to: bookingDetails.email,
-        subject: 'Booking Confirmation - Legends Pilot Point',
-        html: `
-          <p>Dear ${bookingDetails.guestName},</p>
+    // Send guest confirmation + admin alert (simplified)
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: bookingDetails.email,
+      subject: 'Booking Confirmation - Legends Pilot Point',
+      html: `<p>Dear ${bookingDetails.guestName}, your reservation is confirmed from ${bookingDetails.checkInDate} to ${bookingDetails.checkOutDate}.</p>`
+    });
 
-    <p>We are pleased to confirm your reservation for a <b>${bookingDetails.roomType}</b> at <b>Four Horsemen Hotel</b>.</p>
-    <p>Your check-in date is <b>${bookingDetails.checkInDate}</b> and your check-out date is <b>${bookingDetails.checkOutDate}</b>.</p>
-    
-    <p>We hope that your stay with us will be comfortable and enjoyable.</p>
-    
-    <p>Please remember to bring a valid photo ID with you when you check in. If you have any additional requests or questions, please do not hesitate to contact us.</p>
-
-    <br/>
-
-    <p><b>Cancellation Policy:</b><br/>
-    If you cancel your reservation 48 hours before the check-in time, there will be no cancellation fee.<br/>
-    However, if you cancel within 48 hours of the check-in time, a cancellation fee will be charged.</p>
-
-    <br/>
-
-    <p>Thank you for choosing our hotel for your stay. We look forward to welcoming you soon!</p>
-
-    <p>Best regards,<br/>
-    <b>Management – Four Horsemen Hotel</b></p>
-  `,
-         
-      });
-
-      // Send booking alert to admin
-await transporter.sendMail({
-  from: process.env.EMAIL_USER,
-  to: process.env.ADMIN_EMAIL,
-  subject: 'New Booking Received - Four Horsemen Hotel',
-  html: `
-    <p>A new booking has been received:</p>
-
-    <ul>
-      <li><b>Name:</b> ${bookingDetails.guestName}</li>
-      <li><b>Email:</b> ${bookingDetails.email}</li>
-      <li><b>Phone:</b> ${bookingDetails.phone}</li>
-      <li><b>Room Type:</b> ${bookingDetails.roomType}</li>
-      <li><b>Check-in:</b> ${bookingDetails.checkInDate}</li>
-      <li><b>Check-out:</b> ${bookingDetails.checkOutDate}</li>
-      <li><b>Adults:</b> ${bookingDetails.adults}</li>
-      <li><b>Children:</b> ${bookingDetails.children}</li>
-      <li><b>Special Requests:</b> ${bookingDetails.special_requests || 'None'}</li>
-    </ul>
-
-    <p>Please check Supabase or your admin dashboard for full details.</p>
-  `,
-});
-    } catch (emailError) {
-      console.error('Failed to send confirmation email:', emailError);
-      // Optionally, you can still return success, or return a warning to the frontend
-    }
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: process.env.ADMIN_EMAIL,
+      subject: 'New Booking Received',
+      html: `<p>${bookingDetails.guestName} booked a ${bookingDetails.roomType}.</p>`
+    });
 
     res.json({ success: true });
   } catch (err) {
@@ -296,7 +326,7 @@ await transporter.sendMail({
   }
 });
 
-// GET /api/available-rooms?room_type=king&check_in=2025-05-21&check_out=2025-05-22
+// Check available rooms
 app.get('/api/available-rooms', async (req, res) => {
   const { room_type, check_in, check_out } = req.query;
   if (!room_type || !check_in || !check_out) {
@@ -304,18 +334,17 @@ app.get('/api/available-rooms', async (req, res) => {
   }
 
   try {
-    // 1. Get all rooms of the requested type
     const { data: rooms, error: roomsError } = await supabase
       .from('rooms')
-      .select('id, room_type, max_occupancy, price_per_night')
+      .select('id')
       .ilike('room_type', room_type);
 
     if (roomsError) throw roomsError;
+    const totalRooms = rooms.length;
 
-    // 2. Get all bookings that overlap with the requested range
     const { data: bookings, error: bookingsError } = await supabase
       .from('bookings')
-      .select('room_id, room_type')
+      .select('id')
       .lt('check_in_date', check_out)
       .gt('check_out_date', check_in)
       .in('status', ['confirmed', 'pending'])
@@ -323,159 +352,20 @@ app.get('/api/available-rooms', async (req, res) => {
 
     if (bookingsError) throw bookingsError;
 
-    // 3. Create a set of booked room IDs for efficient lookup
     const bookedCount = bookings.length;
-
-    // 4. Filter available rooms and add availability count
-
-    const totalRooms = rooms.length;
     const availableCount = Math.max(totalRooms - bookedCount, 0);
-    res.json({total_rooms: totalRooms,
-  available_count: availableCount,
-  booked_count: bookedCount
-});
 
-    // const availableRooms = rooms
-    //   .filter(room => !bookedRoomIds.has(room.id))
-    //   .map(room => ({
-    //     ...room,
-    //     available_count: 1
-    //   }));
-
-    // 5. Return the total count and available rooms
-    
+    res.json({
+      total_rooms: totalRooms,
+      booked_count: bookedCount,
+      available_count: availableCount
+    });
   } catch (err) {
     console.error('Error fetching available rooms:', err);
     res.status(500).json({ error: err.message });
   }
 });
 
-// POST /api/book-room
-app.post('/api/book-room', async (req, res) => {
-  const { room_id, guest_name, email, phone, check_in_date, check_out_date, adults, children, special_requests, room_type } = req.body;
-  if (!room_id || !guest_name || !email || !check_in_date || !check_out_date) {
-    return res.status(400).json({ error: 'Missing required parameters.' });
-  }
-
-  try {
-    // Double-check for overlap before booking
-    const { data: overlapping, error: overlapError } = await supabase
-      .from('bookings')
-      .select('id')
-      .eq('room_id', room_id)
-      .lt('check_in_date', check_out_date)
-      .gt('check_out_date', check_in_date);
-
-    if (overlapError) throw overlapError;
-    if (overlapping.length > 0) {
-      return res.status(409).json({ error: 'Room is already booked for these dates.' });
-    }
-
-    // Insert booking
-    const { data, error } = await supabase
-      .from('bookings')
-      .insert([{
-        room_id,
-        guest_name,
-        email,
-        phone,
-        check_in_date,
-        check_out_date,
-        adults,
-        children,
-        special_requests,
-        room_type,
-        status: 'confirmed'
-      }]);
-
-    if (error) throw error;
-
-    res.json({ success: true, booking: data[0] });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// // Scheduled cleanup: run every day at 2:00 AM
-// cron.schedule('0 2 * * *', async () => {
-//   try {
-//     const today = new Date().toISOString().slice(0, 10);
-//     const { error } = await supabase
-//       .from('bookings')
-//       .delete()
-//       .lt('check_out_date', today);
-//     if (error) {
-//       console.error('Cleanup error:', error);
-//     } else {
-//       console.log('Old bookings cleaned up successfully');
-//     }
-//   } catch (err) {
-//     console.error('Unexpected cleanup error:', err);
-//   }
-// });
-
-// Endpoint to fetch all Square tax catalog objects (for admin use)
-app.get('/api/square-taxes', async (req, res) => {
-  try {
-    const { result } = await client.catalogApi.listCatalog(undefined, 'TAX');
-    const taxes = (result.objects || []).map(obj => ({
-      id: obj.id,
-      name: obj.taxData?.name,
-      percentage: obj.taxData?.percentage
-    }));
-    res.json({ taxes });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Endpoint to fetch all Square catalog items (for admin use)
-app.get('/api/square-items', async (req, res) => {
-  try {
-    const { result } = await client.catalogApi.listCatalog(undefined, 'ITEM');
-    const items = (result.objects || []).map(obj => ({
-      id: obj.id,
-      name: obj.itemData?.name
-    }));
-    res.json({ items });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Endpoint to fetch the price of a catalog item variation by ID
-app.get('/api/square-item-price/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { result } = await client.catalogApi.retrieveCatalogObject(id, true);
-    const variation = result.object && result.object.itemVariationData;
-    const price = variation && variation.priceMoney ? variation.priceMoney.amount : null;
-    res.json({ price });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Endpoint to fetch all variations and their prices for a given item ID
-app.get('/api/square-item-variations/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { result } = await client.catalogApi.retrieveCatalogObject(id, true);
-    const variations = result.object && result.object.itemData && result.object.itemData.variations
-      ? result.object.itemData.variations.map(v => ({
-          id: v.id,
-          name: v.itemVariationData?.name,
-          price: v.itemVariationData?.priceMoney?.amount
-            ? v.itemVariationData.priceMoney.amount.toString()
-            : null
-        }))
-      : [];
-    res.json({ variations });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
 app.listen(PORT, () => {
-  console.log(`✅ Server running on port ${PORT} (environment: ${process.env.NODE_ENV || 'unknown'})`);
+  console.log(`✅ Server running on port ${PORT}`);
 });
