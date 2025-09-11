@@ -315,30 +315,35 @@ app.get('/api/available-rooms', async (req, res) => {
     // 2. Get all bookings that overlap with the requested range
     const { data: bookings, error: bookingsError } = await supabase
       .from('bookings')
-      .select('room_id')
+      .select('room_id, room_type')
       .lt('check_in_date', check_out)
       .gt('check_out_date', check_in)
-      .in('status', ['confirmed', 'pending']);
+      .in('status', ['confirmed', 'pending'])
+      .ilike('room_type', room_type);
 
     if (bookingsError) throw bookingsError;
 
     // 3. Create a set of booked room IDs for efficient lookup
-    const bookedRoomIds = new Set(bookings.map(b => b.room_id));
+    const bookedCount = bookings.length;
 
     // 4. Filter available rooms and add availability count
-    const availableRooms = rooms
-      .filter(room => !bookedRoomIds.has(room.id))
-      .map(room => ({
-        ...room,
-        available_count: 1
-      }));
+
+    const totalRooms = rooms.length;
+    const availableCount = Math.max(totalRooms - bookedCount, 0);
+    res.json({total_rooms: totalRooms,
+  available_count: availableCount,
+  booked_count: bookedCount
+});
+
+    // const availableRooms = rooms
+    //   .filter(room => !bookedRoomIds.has(room.id))
+    //   .map(room => ({
+    //     ...room,
+    //     available_count: 1
+    //   }));
 
     // 5. Return the total count and available rooms
-    res.json({
-      total_rooms: rooms.length,
-      available_count: availableRooms.length,
-      availableRooms
-    });
+    
   } catch (err) {
     console.error('Error fetching available rooms:', err);
     res.status(500).json({ error: err.message });
