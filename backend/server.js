@@ -215,12 +215,29 @@ app.post('/api/confirm-booking', async (req, res) => {
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: process.env.ADMIN_EMAIL,
-      subject: 'New Booking Received',
-      html: `<p>${bookingDetails.guestName} booked a ${bookingDetails.roomType}.</p>`
+      subject: 'New Booking Received - Four Horsemen Hotel',
+      html: `
+        <p>A new booking has been received:</p>
+
+        <ul>
+          <li><b>Name:</b> ${bookingDetails.guestName}</li>
+          <li><b>Email:</b> ${bookingDetails.email}</li>
+          <li><b>Phone:</b> ${bookingDetails.phone}</li>
+          <li><b>Room Type:</b> ${bookingDetails.roomType}</li>
+          <li><b>Check-in:</b> ${bookingDetails.checkInDate}</li>
+          <li><b>Check-out:</b> ${bookingDetails.checkOutDate}</li>
+          <li><b>Adults:</b> ${bookingDetails.adults}</li>
+          <li><b>Children:</b> ${bookingDetails.children}</li>
+          <li><b>Special Requests:</b> ${bookingDetails.special_requests || 'None'}</li>
+        </ul>
+
+        <p>Please check Supabase or your admin dashboard for full details.</p>
+      `
     });
 
     res.json({ success: true });
   } catch (err) {
+    console.error('Error in confirm-booking:', err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -385,4 +402,3 @@ app.get('/api/square-item-variations/:id', async (req, res) => {
 app.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);
 });
-
