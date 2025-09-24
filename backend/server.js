@@ -315,9 +315,9 @@ app.post('/api/book-room', async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`✅ Server running on port ${PORT}`);
-});
+// app.listen(PORT, () => {
+//   console.log(`✅ Server running on port ${PORT}`);
+// });
 
 // Endpoint to fetch the price of a catalog item variation by ID
 app.get('/api/square-item-price/:id', async (req, res) => {
