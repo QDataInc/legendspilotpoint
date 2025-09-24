@@ -320,38 +320,68 @@ app.post('/api/book-room', async (req, res) => {
 // });
 
 // Endpoint to fetch the price of a catalog item variation by ID
+
+app.get('/api/square-items', async (req, res) => {
+  try {
+    const { result } = await client.catalogApi.listCatalog(undefined, 'ITEM');
+    const items = (result.objects || []).map(obj => ({
+      id: obj.id,
+      name: obj.itemData?.name
+    }));
+    res.json({ items });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// List all taxes
+app.get('/api/square-taxes', async (req, res) => {
+  try {
+    const { result } = await client.catalogApi.listCatalog(undefined, 'TAX');
+    const taxes = (result.objects || []).map(obj => ({
+      id: obj.id,
+      name: obj.taxData?.name,
+      percentage: obj.taxData?.percentage
+    }));
+    res.json({ taxes });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get price of a variation by ID
 app.get('/api/square-item-price/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const { result } = await client.catalogApi.retrieveCatalogObject(id, true);
     const variation = result.object && result.object.itemVariationData;
-    const price = variation && variation.priceMoney ? variation.priceMoney.amount : null;
+    const price = variation?.priceMoney ? variation.priceMoney.amount : null;
     res.json({ price });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// Endpoint to fetch all variations and their prices for a given item ID
+// Get all variations for an item
 app.get('/api/square-item-variations/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const { result } = await client.catalogApi.retrieveCatalogObject(id, true);
-    const variations = result.object && result.object.itemData && result.object.itemData.variations
-      ? result.object.itemData.variations.map(v => ({
-          id: v.id,
-          name: v.itemVariationData?.name,
-          price: v.itemVariationData?.priceMoney?.amount
-            ? v.itemVariationData.priceMoney.amount.toString()
-            : null
-        }))
-      : [];
+    const variations = result.object?.itemData?.variations?.map(v => ({
+      id: v.id,
+      name: v.itemVariationData?.name,
+      price: v.itemVariationData?.priceMoney?.amount
+        ? v.itemVariationData.priceMoney.amount.toString()
+        : null
+    })) || [];
     res.json({ variations });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
+// ----------------- Start Server -----------------
 app.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);
 });
+
