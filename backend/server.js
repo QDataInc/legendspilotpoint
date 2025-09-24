@@ -140,7 +140,8 @@ app.post('/api/create-payment', async (req, res) => {
 
     const taxes = [
       { uid: 'state-tax', catalogObjectId: '36IIU7DDUY3NUUA7O3CSWD6L' },
-      { uid: 'occupancy-tax', catalogObjectId: '3OEAVFNFCSQEKCNHJ7LYTBAS' }
+      { uid: 'occupancy-tax', catalogObjectId: '3OEAVFNFCSQEKCNHJ7LYTBAS' },
+      { uid: 'county-tax', catalogObjectId: 'KLGAEFMWEP5SVN7SJDGOBEWL' }
     ];
 
     const bookingDetails = {
