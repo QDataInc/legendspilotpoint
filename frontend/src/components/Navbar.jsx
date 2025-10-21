@@ -65,7 +65,8 @@ const Navbar = () => {
           { path: "/PrivateDining", label: "PrivateDining" },
           { path: "/Events", label: "Events" },
           { path: "/AboutUs", label: "AboutUs" },
-          { path: "/Reservation", label: "Hotel Reservation" }
+          { path: "/Reservation", label: "Hotel Reservation" },
+          { path: "/Careers", label: "Careers" } 
         ].map((item) => (
           <motion.button
             key={item.path}
@@ -132,6 +133,7 @@ const Navbar = () => {
             { path: "/Events", label: "Events" },
             { path: "/AboutUs", label: "AboutUs" },
             { path: "/Reservation", label: "Hotel Reservation" },
+            { path: "/Careers", label: "Careers" },
             { path: "/admin", label: "Admin" }
           ].map((item) => (
             <motion.button
@@ -217,6 +219,7 @@ const Navbar = () => {
                 { path: "/Events", label: "Events" },
                 { path: "/AboutUs", label: "About Us" },
                 { path: "/Reservation", label: "Hotel Reservation" },
+                 { path: "/Careers", label: "Careers" },
                 { path: "/admin", label: "Admin" }
               ].map((item) => (
                 <motion.button
