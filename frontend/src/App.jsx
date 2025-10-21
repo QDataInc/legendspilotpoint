@@ -15,6 +15,7 @@ import TestCheckout from "./components/TestCheckout";
 import Login from "./components/Login";
 import { AuthProvider } from "./context/AuthContext";
 import Confirmation from "./components/Confirmation";
+import Careers from "./components/Careers";
 import { useState, useEffect } from "react";
 
 // ScrollToTop component
@@ -191,6 +192,7 @@ function App() {
               <Route path="/Events" element={<Events></Events>}></Route>
               <Route path="/AboutUs" element={<AboutUs></AboutUs>}></Route>
               <Route path="/Reservation" element={<Reservation></Reservation>}></Route>
+              <Route path="/Careers" element={<Careers />} />
               <Route path="/room-details/:roomId" element={<RoomDetails />}></Route>
               <Route path="/admin" element={<AdminDashboard />}></Route>
               <Route path="/test-supabase" element={<TestSupabase />}></Route>
