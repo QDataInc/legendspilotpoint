@@ -5,6 +5,8 @@ const POSITIONS = [
   "Server / Waiter / Waitress",
   "Bartender",
   "Chef",
+  "Assistant Chef",
+  "Shift Manager",
   "Front Desk Attendant / Receptionist",
   "Housekeeper / Room Attendant",
 ];
@@ -15,6 +17,7 @@ const LEGAL_STATUSES = [
   "Work Authorization",
 ];
 
+const GENDERS = ["Male", "Female"];
 export default function Careers() {
   const [form, setForm] = useState({
     name: "",
@@ -40,8 +43,16 @@ export default function Careers() {
 
   const validate = () => {
     if (!form.name.trim()) return "Please enter your full name.";
-    if (!/^\S+@\S+\.\S+$/.test(form.email)) return "Please enter a valid email.";
-    if (!form.phone.trim()) return "Please enter your phone number.";
+    // Email
+    const emailPattern = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+    if (!emailPattern.test(form.email))
+      return "Please enter a valid email address.";
+
+    // Phone
+    const phonePattern = /^\(?([0-9]{3})\)?[-.\s]?([0-9]{3})[-.\s]?([0-9]{4})$/;
+    if (!phonePattern.test(form.phone.trim()))
+      return "Please enter a valid 10-digit phone number (e.g., 469-588-4810).";
+ 
     if (!form.age || Number(form.age) < 14) return "Please enter a valid age (14+).";
     if (form.experienceYears === "" || Number(form.experienceYears) < 0)
       return "Please enter years of experience (0 or more).";
