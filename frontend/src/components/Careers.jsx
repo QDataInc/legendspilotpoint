@@ -67,7 +67,7 @@ export default function Careers() {
     try {
       const fd = new FormData();
       Object.entries(form).forEach(([k, v]) => fd.append(k, v));
-      const res = await fetch("/api/careers/apply", { method: "POST", body: fd });
+      const res = await fetch("https://legendspilotpoint-backend.onrender.com/api/careers/apply", { method: "POST", body: fd });
       if (!res.ok) throw new Error(await res.text());
       setMsg("Application submitted! You’ll receive a confirmation email shortly.");
       setForm({
