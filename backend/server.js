@@ -5,6 +5,8 @@ import crypto from 'crypto';
 import { Client, Environment } from 'square';
 import nodemailer from 'nodemailer';
 import { supabase } from './supabase.js';
+import multer from 'multer';
+
 import cron from 'node-cron';
 
 dotenv.config();
@@ -415,6 +417,82 @@ app.get('/api/square-item-variations/:id', async (req, res) => {
     res.json({ variations });
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+});
+
+// ----------------- Careers Form Route -----------------
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB max
+  fileFilter: (req, file, cb) => {
+    const allowed = [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    ];
+    if (allowed.includes(file.mimetype)) cb(null, true);
+    else cb(new Error('Only PDF/DOC/DOCX files are allowed.'));
+  }
+});
+
+app.post('/api/careers/apply', upload.single('resume'), async (req, res) => {
+  try {
+    const { name, email, phone, age, experienceYears, legalStatus, position } = req.body;
+
+    if (!name || !email || !phone || !age || !experienceYears || !legalStatus || !position) {
+      return res.status(400).send('Missing required fields.');
+    }
+    if (!req.file) return res.status(400).send('Resume file is required.');
+
+    // 1️⃣ Email to Admin
+    const adminHtml = `
+      <h2>New Job Application — ${position}</h2>
+      <p><b>Name:</b> ${name}</p>
+      <p><b>Email:</b> ${email}</p>
+      <p><b>Phone:</b> ${phone}</p>
+      <p><b>Age:</b> ${age}</p>
+      <p><b>Years of Experience:</b> ${experienceYears}</p>
+      <p><b>Legal Status:</b> ${legalStatus}</p>
+      <p><b>Position:</b> ${position}</p>
+      <p><b>Submitted:</b> ${new Date().toLocaleString()}</p>
+    `;
+
+    await transporter.sendMail({
+      from: `"Legends Careers" <${process.env.EMAIL_USER}>`,
+      to: process.env.ADMIN_EMAIL,
+      subject: `New Application: ${position} — ${name}`,
+      html: adminHtml,
+      attachments: [
+        {
+          filename: req.file.originalname,
+          content: req.file.buffer,
+          contentType: req.file.mimetype
+        }
+      ]
+    });
+
+    // 2️⃣ Confirmation email to applicant
+    const applicantHtml = `
+      <div style="font-family:Arial,Helvetica,sans-serif">
+        <h2>Thank You for Applying</h2>
+        <p>Hi ${name},</p>
+        <p>We received your application for <b>${position}</b> at Legends Pilot Point.</p>
+        <p>Our hiring team will review your application and contact you soon.</p>
+        <p>— Legends Pilot Point Management</p>
+      </div>
+    `;
+
+    await transporter.sendMail({
+      from: `"Legends Careers" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: 'We received your application!',
+      html: applicantHtml
+    });
+
+    res.status(200).send('Application submitted successfully.');
+  } catch (err) {
+    console.error('Error in careers form:', err);
+    res.status(500).send('Failed to submit application.');
   }
 });
 
