@@ -24,6 +24,7 @@ export default function Careers() {
     email: "",
     phone: "",
     age: "",
+    gender: "",
     experienceYears: "",
     legalStatus: "",
     position: "",
@@ -126,6 +127,22 @@ export default function Careers() {
               <input type="number" min="14" name="age" value={form.age} onChange={onChange}
                 className="w-full rounded-lg bg-[#1d1d1d] border border-white/10 p-3 focus:ring-2 focus:ring-[#F56A00]" />
             </div>
+            <div>
+  <label className="block mb-2 text-sm text-white/80">Gender</label>
+  <select
+    name="gender"
+    value={form.gender}
+    onChange={onChange}
+    className="w-full rounded-lg bg-[#1d1d1d] border border-white/10 p-3 focus:ring-2 focus:ring-[#F56A00]"
+  >
+    <option value="">Select gender</option>
+    {GENDERS.map((g) => (
+      <option key={g} value={g}>
+        {g}
+      </option>
+    ))}
+  </select>
+</div>
             <div>
               <label className="block mb-2 text-sm text-white/80">Years of Experience</label>
               <input type="number" min="0" name="experienceYears" value={form.experienceYears} onChange={onChange}
