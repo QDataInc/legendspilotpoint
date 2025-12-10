@@ -191,9 +191,9 @@ const RoomDetails = () => {
   function getRoomPrice(roomType, dateString) {
     const weekend = isWeekend(dateString);
     if (roomType.toLowerCase().includes('king')) {
-      return weekend ? 100 : 110;
+      return weekend ? 80 : 85;
     } else if (roomType.toLowerCase().includes('queen')) {
-      return weekend ? 110 : 120;
+      return weekend ? 80 : 85;
     }
     return 0;
   }
