@@ -145,9 +145,9 @@ const Reservation = () => {
   function getRoomPrice(roomType, dateString) {
     const weekend = isWeekend(dateString);
     if (roomType.toLowerCase().includes('king')) {
-      return weekend ? 80 : 80;
+      return weekend ? 80 : 70;
     } else if (roomType.toLowerCase().includes('queen')) {
-      return weekend ? 85 : 85;
+      return weekend ? 85 : 70;
     }
     return 0;
   }
@@ -377,7 +377,7 @@ const Reservation = () => {
                           <p className="text-2xl font-bold text-[#F56A00] mb-2">
                             {(searchParams.checkIn)
                               ? `$${getRoomPrice(type, searchParams.checkIn)}/night`
-                              : (type === 'king' ? '$110–$125/night' : '$120–$135/night')}
+                              : (type === 'king' ? '$80–$80/night' : '$85–$85/night')}
                           </p>
                           <h5 className="text-[#2E2E2E] font-semibold mb-2">Amenities:</h5>
                           <ul className="space-y-1 text-base mb-2">
