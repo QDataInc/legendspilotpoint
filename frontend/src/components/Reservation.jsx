@@ -33,6 +33,10 @@ const ROOM_DETAILS = {
 
 const Reservation = () => {
   const navigate = useNavigate();
+  // TEMP: Force the Reservation page to display "Fully Booked" (no rooms) regardless of availability.
+  // Flip to false (or remove) when you want to show real-time availability again.
+  const FORCE_FULLY_BOOKED = true;
+
   const [showGuestModal, setShowGuestModal] = useState(false);
   const [showRooms, setShowRooms] = useState(false);
   const [error, setError] = useState('');
@@ -97,6 +101,14 @@ const Reservation = () => {
     console.log('handleSearch called with:', searchParams);
     if (validateDates()) {
       try {
+        if (FORCE_FULLY_BOOKED) {
+          // Show the results section, but force an empty availability list.
+          setAllAvailableRooms([]);
+          setShowRooms(true);
+          setShowGuestModal(false);
+          return;
+        }
+
         const kingRooms = await fetchAvailableRooms('king', searchParams.checkIn, searchParams.checkOut);
         const queenRooms = await fetchAvailableRooms('queen', searchParams.checkIn, searchParams.checkOut);
         const combinedRooms = [...kingRooms, ...queenRooms];
@@ -133,6 +145,13 @@ const Reservation = () => {
     acc[type].push(room);
     return acc;
   }, {});
+
+  const isFullyBooked = useMemo(() => {
+    if (FORCE_FULLY_BOOKED) return true;
+    const kingCount = (groupedRooms.king || []).length;
+    const queenCount = (groupedRooms.queen || []).length;
+    return kingCount + queenCount === 0;
+  }, [FORCE_FULLY_BOOKED, groupedRooms]);
 
   // Price calculation helpers
   function isWeekend(dateString) {
@@ -333,6 +352,16 @@ const Reservation = () => {
             <h2 className="text-3xl font-['Cinzel'] text-[#2E2E2E] mb-8 font-bold text-center">
               Available Rooms
             </h2>
+
+            {isFullyBooked && !loading && (
+              <div className="max-w-3xl mx-auto mb-8 p-5 rounded-lg border border-red-200 bg-red-50 text-center">
+                <div className="text-2xl font-bold text-red-700">Fully Booked</div>
+                <div className="text-red-700 mt-1">
+                  No rooms available for the selected dates.
+                </div>
+              </div>
+            )}
+
             {loading ? (
               <div className="text-center text-gray-600">Loading room availability...</div>
             ) : (
