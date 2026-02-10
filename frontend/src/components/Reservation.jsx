@@ -35,7 +35,7 @@ const Reservation = () => {
   const navigate = useNavigate();
   // TEMP: Force the Reservation page to display "Fully Booked" (no rooms) regardless of availability.
   // Flip to false (or remove) when you want to show real-time availability again.
-  const FORCE_FULLY_BOOKED = true;
+  const FORCE_FULLY_BOOKED = false;
 
   const [showGuestModal, setShowGuestModal] = useState(false);
   const [showRooms, setShowRooms] = useState(false);
