@@ -203,6 +203,9 @@ const Reservation = () => {
         <p className="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
           Experience the perfect blend of comfort and rustic charm at our restaurant. Select your dates and find your ideal room.
         </p>
+        <p className="text-center text-gray-700 mb-12 max-w-2xl mx-auto font-semibold">
+  Any questions related to room booking, please contact <a href="tel:19406862256" className="text-[#F56A00] hover:underline">(940) 686-2256</a>
+</p>
 
         {/* Search Form */}
         <div className="bg-white rounded-xl shadow-lg p-8 mb-12 border border-[#D8CFC4]">
