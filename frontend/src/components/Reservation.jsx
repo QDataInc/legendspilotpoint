@@ -147,7 +147,7 @@ const Reservation = () => {
   }, {});
 
   const isFullyBooked = useMemo(() => {
-    if (FORCE_FULLY_BOOKED) return true;
+    if (FORCE_FULLY_BOOKED) return false;
     const kingCount = (groupedRooms.king || []).length;
     const queenCount = (groupedRooms.queen || []).length;
     return kingCount + queenCount === 0;
